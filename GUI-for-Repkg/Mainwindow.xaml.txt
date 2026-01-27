@@ -1,0 +1,425 @@
+﻿<Window x:Class="GUI_for_Repkg.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GUI_for_Repkg"
+        mc:Ignorable="d" 
+        Title="GUI for Repkg" Height="850" Width="950" MinWidth="600" MinHeight="610">
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo x:Name="TaskBarProgress"/>
+    </Window.TaskbarItemInfo>
+    <TabControl SelectionChanged="TabControl_SelectionChanged">
+        <TabItem Header="壁纸转换">
+            <Grid>
+                <TabControl Grid.RowSpan="2" Grid.ColumnSpan="4" SelectionChanged="TabControl_SelectionChanged_3">
+                    <TabItem Header="已有壁纸">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="0" x:Name="LeftColumn"/>
+                                <ColumnDefinition Width="*" MinWidth="200"/>
+                                <ColumnDefinition Width="270"/>
+                            </Grid.ColumnDefinitions>
+                            <GroupBox Grid.Column="0"
+                                      Margin="0,6,3,0">
+                                <GroupBox.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="&lt;&lt;" Margin="0,0,0,0" Width="30" Click="Unenable_Left_Column_Click"/>
+                                        <TextBlock Text="筛选结果" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </GroupBox.Header>
+                                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                              HorizontalScrollBarVisibility="Disabled"
+                                              Padding="4">
+                                    <StackPanel>
+                                        <Expander Header="年龄分类"
+                                                  IsExpanded="True"
+                                                  HorizontalAlignment="Stretch"
+                                                  Margin="0,0,0,4">
+                                            <StackPanel x:Name="AgeFilterPanel">
+                                                <CheckBox x:Name="Everyone" Content="大众级" Margin="0,4,0,4" IsChecked="True" Click="OnFilterChanged"/>
+                                                <CheckBox x:Name="Questionable" Content="家长指导级" Margin="0,4,0,4" IsChecked="True" Click="OnFilterChanged"/>
+                                                <CheckBox x:Name="Mature" Content="限制级/成人级" Margin="0,4,0,4" IsChecked="True" Click="OnFilterChanged"/>
+                                            </StackPanel>
+                                        </Expander>
+                                        <Expander Header="标签" HorizontalAlignment="Stretch" Margin="0,0,0,4" IsExpanded="True">
+                                            <StackPanel x:Name="TagsListPanel">
+                                                <StackPanel Height="19" Orientation="Horizontal">
+                                                    <Button x:Name="SelectAllButton" Content="全部" Width="51.5" Background="{x:Null}" BorderBrush="{x:Null}" Click="SelectAllButton_Click"/>
+                                                    <Button x:Name="SelectNoneButton" Content="无" Width="51.5" BorderBrush="{x:Null}" Background="{x:Null}" Click="SelectNoneButton_Click"/>
+                                                </StackPanel>
+                                                <CheckBox Content="抽象" Tag="Abstract" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="动物" Tag="Animal" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="动漫" Tag="Anime" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="卡通" Tag="Cartoon" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="CGI" Tag="CGI" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="网络朋克" Tag="Cyberpunk" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="幻想" Tag="Fantasy" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="游戏" Tag="Game" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="女性" Tag="Girls" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="男性" Tag="Guys" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="风景" Tag="Landscape" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="中世纪" Tag="Medieval" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="网红事物" Tag="Memes" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="MMD" Tag="MMD" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="音乐" Tag="Music" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="自然" Tag="Nature" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="像素艺术" Tag="Pixel art" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="轻松" Tag="Relaxing" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="复古" Tag="Retro" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="科幻" Tag="Sci-Fi" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="运动" Tag="Sports" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="科技" Tag="Technology" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="电视节目" Tag="Television" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="汽车" Tag="Vehicle" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                                <CheckBox Content="未指定样式" Tag="Unspecified" IsChecked="True" Click="OnFilterChanged" Margin="0,4,0,4"/>
+                                            </StackPanel>
+                                        </Expander>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </GroupBox>
+                            <TextBox x:Name="OutputPathBox" Grid.Column="1" HorizontalAlignment="Stretch" Margin="42,8,120,0" TextWrapping="NoWrap" VerticalAlignment="Top"/>
+                            <Button x:Name="EnableLeftColumnButton" Visibility="Visible" Content=">>" Width="30" Grid.Column="1" Margin="9,7,110,0" HorizontalAlignment="Left" VerticalAlignment="Top" Click="Enable_Left_Column_Click"/>
+                            <Button Content="设定目录" Click="SettleOutputPathBox" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Width="60" Margin="0,7,55,0"/>
+                            <Button Content="浏览" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Width="50" Margin="0,7,0,0" Click="OpenOutputPathBox_Click"/>
+                            <ScrollViewer x:Name="ThumbnailScrollViewer"
+                                          Grid.Column="1"
+                                          HorizontalScrollBarVisibility="Disabled"
+                                          VerticalScrollBarVisibility="Auto"
+                                          Margin="0,31,0,0" Width="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
+                                <WrapPanel x:Name="ThumbnailPanel" Orientation="Horizontal"/>
+                            </ScrollViewer>
+
+                            <Grid Grid.Column="2" Margin="2,6,6,23" VerticalAlignment="Stretch">
+                                <Border BorderBrush="Black" BorderThickness="1" Margin="0,0,-5,0">
+                                    <Grid VerticalAlignment="Stretch">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="120"/>
+                                            <RowDefinition Height="400"/>
+                                            <RowDefinition Height="120*"/>
+                                        </Grid.RowDefinitions>
+
+                                        <TextBox x:Name="WallpaperSearchBox" PreviewKeyDown="TextBox_EnterDown" TextChanged="SearchBox_Changed" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,0,30,0" Height="30" FontSize="20" Background="#FFECECEC"/>
+                                        <Button Grid.Row="0" Content="搜索" HorizontalAlignment="Right" VerticalAlignment="Top" Height="30" Width="30" Click="SearchButton_Click"/>
+                                        <TextBlock Grid.Row="0" x:Name="SituationPresentation" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Top" Height="85" Width="220" FontWeight="Bold" Margin="0,35,0,0" TextAlignment="Center"/>
+
+                                        <Border
+                                            x:Name="DetailPreviewShadow"
+                                            Grid.Row="1" 
+                                            Height="180" 
+                                            Width="180"
+                                            Background="White"
+                                            VerticalAlignment="Center"
+                                            Margin="0,0,0,200"
+                                            Visibility="Collapsed">
+                                            <Border.Effect>
+                                                <DropShadowEffect Color="Black" Direction="315" ShadowDepth="4" BlurRadius="4" Opacity="0.5"/>
+                                            </Border.Effect>
+                                        </Border>
+
+                                        <Image  
+                                            Grid.Row="1" 
+                                            x:Name="DetailPreview" 
+                                            Height="180" 
+                                            Width="180"
+                                            Stretch="Uniform"
+                                            VerticalAlignment="Center"
+                                            HorizontalAlignment="Center" Margin="0,0,0,200">
+                                        </Image>
+
+                                        <TextBlock
+                                            Grid.Row="1"
+                                            x:Name="DetailTitle"
+                                            TextWrapping="Wrap"
+                                            FontSize="17"
+                                            FontWeight="Bold"
+                                            Text="请选择壁纸"
+                                            Margin="0,200,0,0"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Top" Height="220" Width="200"
+                                            TextAlignment="Center"/>
+
+                                        <TextBlock
+                                            Grid.Row="1"
+                                            x:Name="DetailWorkshopID"
+                                            FontSize="10"
+                                            Foreground="Gray"
+                                            Margin="0,-5,0,0"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Top" Height="13" Width="100"
+                                            TextAlignment="Center"/>
+
+                                        <Grid Grid.Row="2">
+                                            <Button Click="InverseSelect_Click" Content="反选" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="5,0,7,39" Height="30" Width="77"/>
+                                            <Button x:Name="MultipleChoice" Click="MultipleChoice_Click" Content="多选" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="7,0,0,39" Height="30" Width="77"/>
+                                            <Button Click="SelectAll_Click" Content="全选" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,39" Height="30" Width="77"/>
+                                            <Button x:Name="StartProcessButton" Click="StartProcess_Click" Content="开始转换" HorizontalAlignment="Center" Margin="0,0,0,5" VerticalAlignment="Bottom" Height="30" Width="250"/>
+                                            <TextBlock x:Name="SelectedCount" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="5,5,5,78"/>
+                                        </Grid>
+
+                                    </Grid>
+                                </Border>
+
+                            </Grid>
+                            <Button Click="BtnStop_Click" x:Name="BtnStop" Grid.Column="2" Content="🛑" IsEnabled="False" HorizontalAlignment="Right" Height="20" Margin="0,0,1,0" Width="20" Background="#FFDDDDDD" VerticalAlignment="Bottom" Foreground="Red" ToolTipService.InitialShowDelay="200" ToolTipService.ShowDuration="60000" Cursor="Hand">
+                                <Button.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel Width="220">
+                                            <TextBlock Text="停止" TextWrapping="Wrap" />
+                                            <TextBlock Text="只有在暂停时才能停止" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </Button.ToolTip>
+                            </Button>
+
+                            <Button Click="BtnPause_Click" x:Name="BtnPause" Grid.Column="2" Content="⏸" IsEnabled="False" HorizontalAlignment="Right" Height="20" Margin="0,0,23,0" Width="20" Background="#FFDDDDDD" VerticalAlignment="Bottom" Foreground="Blue" ToolTipService.InitialShowDelay="200" ToolTipService.ShowDuration="60000" Cursor="Hand">
+                                <Button.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel Width="220">
+                                            <TextBlock Text="暂停" TextWrapping="Wrap" />
+                                            <TextBlock Text="单击暂停将在当前转换任务完成后暂停；双击暂停将迅速暂停转换，转换至一半的壁纸在开始时需要重新转换。具体暂停细节受到多线程支持影响。" TextWrapping="Wrap" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </Button.ToolTip>
+                            </Button>
+
+                            <Button Click="BtnResume_Click" x:Name="BtnResume" Grid.Column="2" Content="▶" IsEnabled="False" HorizontalAlignment="Right" Height="20" Margin="0,0,45,0" Width="20" Background="#FFDDDDDD" VerticalAlignment="Bottom" Foreground="Green" ToolTipService.InitialShowDelay="200" ToolTipService.ShowDuration="60000" Cursor="Hand">
+                                <Button.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel Width="220">
+                                            <TextBlock Text="继续" TextWrapping="Wrap" />
+                                            <TextBlock Text="在暂停的进度上继续" TextWrapping="Wrap" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </Button.ToolTip>
+                            </Button>
+
+                            <ProgressBar x:Name="ConversionProgressBar1" Grid.Column="2" Height="20" Margin="2,0,68,0" VerticalAlignment="Bottom" />
+                        </Grid>
+                    </TabItem>
+                    <TabItem Header="导入壁纸">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="100"/>
+                                <RowDefinition Height="60*"/>
+                                <RowDefinition Height="22"/>
+                            </Grid.RowDefinitions>
+                            <GroupBox Header="单个壁纸">
+                                <Grid>
+                                    <TextBox HorizontalAlignment="Stretch" Margin="63,10,182,0" TextWrapping="NoWrap" VerticalAlignment="Top" MinWidth="10"/>
+                                    <TextBox HorizontalAlignment="Stretch" Margin="63,39,182,0" TextWrapping="NoWrap" VerticalAlignment="Top" MinWidth="10"/>
+                                    <Button Content="选择壁纸" HorizontalAlignment="Right" Margin="0,9,110,0" VerticalAlignment="Top" Click="Button_Click_2" Width="65"/>
+                                    <Button Content="输出路径" HorizontalAlignment="Right" Margin="0,38,110,0" VerticalAlignment="Top" Click="Button_Click_3" Width="65"/>
+                                    <TextBlock HorizontalAlignment="Left" Margin="12,11,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="zh-cn" Text="壁纸路径"/></TextBlock>
+                                    <TextBlock HorizontalAlignment="Left" Margin="12,40,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="zh-cn" Text="输出路径"/></TextBlock>
+                                    <Button Content="输出" HorizontalAlignment="Right" Margin="0,9,3,0" VerticalAlignment="Top" Height="48" MinWidth="100" Click="Button_Click_4"/>
+                                </Grid>
+                            </GroupBox>
+                            <GroupBox Header="多个壁纸" Grid.Row="1">
+                                <Grid>
+                                    <TextBlock Text="文件夹路径" HorizontalAlignment="Left" Margin="0,11,0,0" VerticalAlignment="Top"/>
+                                    <TextBox HorizontalAlignment="Stretch" Margin="63,10,182,0" TextWrapping="NoWrap" VerticalAlignment="Top" MinWidth="10"/>
+                                    <TextBlock HorizontalAlignment="Left" Margin="12,40,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="zh-cn" Text="输出路径"/></TextBlock>
+                                    <TextBox HorizontalAlignment="Stretch" Margin="63,39,182,0" TextWrapping="NoWrap" VerticalAlignment="Top" MinWidth="10"/>
+                                    <Button Content="选择文件夹" HorizontalAlignment="Right" Margin="0,9,110,0" VerticalAlignment="Top" Click="Button_Click_2" Width="65"/>
+                                    <Button Content="输出路径" HorizontalAlignment="Right" Margin="0,38,110,0" VerticalAlignment="Top" Click="Button_Click_3" Width="65"/>
+                                    <Button Content="输出" HorizontalAlignment="Right" Margin="0,9,3,0" VerticalAlignment="Top" Height="48" MinWidth="100" Click="Button_Click_4"/>
+                                    <Grid Margin="0,62,0,0">
+                                        <Border>
+                                            <ScrollViewer VerticalScrollBarVisibility="Auto"/>
+                                        </Border>
+                                    </Grid>
+                                </Grid>
+                            </GroupBox>
+                            <ProgressBar HorizontalAlignment="Stretch" Height="20" Grid.Row="2" VerticalAlignment="Center" MinWidth="10" Margin="0,2,73,0"/>
+                            <Button Grid.Row="2" Content="🛑" HorizontalAlignment="Right" Height="20" Margin="0,0,6,0" Width="20" Background="#FFDDDDDD" VerticalAlignment="Bottom" Foreground="Red" ToolTipService.InitialShowDelay="200" ToolTipService.ShowDuration="60000" Cursor="Hand">
+                                <Button.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel Width="220">
+                                            <TextBlock Text="停止" TextWrapping="Wrap" />
+                                            <TextBlock Text="只有在暂停时才能停止" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </Button.ToolTip>
+                            </Button>
+
+                            <Button Grid.Row="2" Content="⏸" HorizontalAlignment="Right" Height="20" Margin="0,0,28,0" Width="20" Background="#FFDDDDDD" VerticalAlignment="Bottom" Foreground="Blue" ToolTipService.InitialShowDelay="200" ToolTipService.ShowDuration="60000" Cursor="Hand">
+                                <Button.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel Width="220">
+                                            <TextBlock Text="暂停" TextWrapping="Wrap" />
+                                            <TextBlock Text="单击暂停将在当前转换任务完成后暂停；双击暂停将迅速暂停转换，转换至一半的壁纸在开始时需要重新转换。具体暂停细节受到多线程支持影响。" TextWrapping="Wrap" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </Button.ToolTip>
+                            </Button>
+
+                            <Button Grid.Row="2" Content="▶" HorizontalAlignment="Right" Height="20" Margin="0,0,50,0" Width="20" Background="#FFDDDDDD" VerticalAlignment="Bottom" Foreground="Green" ToolTipService.InitialShowDelay="200" ToolTipService.ShowDuration="60000" Cursor="Hand">
+                                <Button.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel Width="220">
+                                            <TextBlock Text="继续" TextWrapping="Wrap"/>
+                                            <TextBlock Text="在暂停的进度上继续" TextWrapping="Wrap" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </Button.ToolTip>
+                            </Button>
+
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+        </TabItem>
+        <TabItem Header="设置">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="240"/>
+                    <RowDefinition Height="120"/>
+                    <RowDefinition Height="40*"/>
+                </Grid.RowDefinitions>
+                <GroupBox Grid.Row="0" Header="转换设置">
+                    <Grid>
+                        <CheckBox x:Name="UseProjectNameForFile" VerticalAlignment="Top" Margin="15,20,0,0">
+                            <TextBlock Text="使用壁纸名作为子目录名称而非ID（仅在“已有壁纸”页面中生效）"/>
+                            <CheckBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="220">
+                                        <TextBlock Text="模糊开关" TextWrapping="Wrap" />
+                                        <TextBlock Text="打开后会为非大众级壁纸封面做模糊处理。" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+
+                        <CheckBox x:Name="JustSaveImages" VerticalAlignment="Top" Margin="15,45,0,0">
+                            <TextBlock Text="只保留图像文件"/>
+                            <CheckBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="220">
+                                        <TextBlock Text="模糊开关" TextWrapping="Wrap" />
+                                        <TextBlock Text="打开后会为非大众级壁纸封面做模糊处理。" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+
+                        <CheckBox x:Name="DontTransformTexFiles" VerticalAlignment="Top" Margin="15,70,0,0">
+                            <TextBlock Text="不将Tex文件转换为图像"/>
+                            <CheckBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="220">
+                                        <TextBlock Text="模糊开关" TextWrapping="Wrap" />
+                                        <TextBlock Text="打开后会为非大众级壁纸封面做模糊处理。" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+
+                        <CheckBox x:Name="PutAllFilesInOneDirectory" VerticalAlignment="Top" Margin="15,95,0,0">
+                            <TextBlock Text="将所有提取的文件放到一个目录中，而不是保留它们的原始路径"/>
+                            <CheckBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="220">
+                                        <TextBlock Text="模糊开关" TextWrapping="Wrap" />
+                                        <TextBlock Text="打开后会为非大众级壁纸封面做模糊处理。" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+
+                        <CheckBox x:Name="CoverAllFiles" VerticalAlignment="Top" Margin="15,120,0,0">
+                            <TextBlock Text="覆盖所有现有文件"/>
+                            <CheckBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="220">
+                                        <TextBlock Text="模糊开关" TextWrapping="Wrap" />
+                                        <TextBlock Text="打开后会为非大众级壁纸封面做模糊处理。" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+
+                        <CheckBox x:Name="CopyProjectJson" VerticalAlignment="Top" Margin="15,145,0,0">
+                            <TextBlock Text="从PKG文件所在位置复制project.json到输出目录"/>
+                            <CheckBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="220">
+                                        <TextBlock Text="模糊开关" TextWrapping="Wrap" />
+                                        <TextBlock Text="打开后会为非大众级壁纸封面做模糊处理。" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+
+                        <Grid VerticalAlignment="Bottom" Margin="15,145,0,0" Height="50">
+                            <CheckBox x:Name="multithreading"
+                                      VerticalAlignment="Top"
+                                      Height="15"
+                                      Checked="Multithreading_Checked"
+                                      Unchecked="Multithreading_Unchecked" >
+                                <TextBlock Text="多线程支持"/>
+                                <CheckBox.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel Width="220">
+                                            <TextBlock Text="模糊开关" TextWrapping="Wrap" />
+                                            <TextBlock Text="打开后会为非大众级壁纸封面做模糊处理。" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </CheckBox.ToolTip>
+                            </CheckBox>
+                            <TextBlock Text="线程数" HorizontalAlignment="Left" Margin="50,17,0,0"/>
+                            <ComboBox x:Name="cmbThreadCount" Width="55" Height="20" HorizontalAlignment="Left" Margin="90,0,0,0"/>
+                        </Grid>
+                    </Grid>
+                </GroupBox>
+                
+                <GroupBox Grid.Row="1" Header="启动设置">
+                    <Grid>
+                        <CheckBox x:Name="LoadImageWhenStart" VerticalAlignment="Top" Margin="15,20,0,0" IsChecked="True">
+                            <TextBlock Text="每次启动时自动加载已有壁纸列表"/>
+                            <CheckBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Width="220">
+                                        <TextBlock Text="自动加载已有壁纸" TextWrapping="Wrap" />
+                                        <TextBlock Text="开启此选项，每次打开程序将自动加载已有壁纸列表" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <TextBlock Text="已有壁纸路径" Margin="15,45,0,0"/>
+                        <TextBox x:Name="WallpapersFile" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="15,65,80,0"/>
+                        <Button Content="恢复默认" HorizontalAlignment="Right" Margin="0,65,15,0" VerticalAlignment="Top" Width="60"  Click="RestoreDefaultWallpapersPath_Click"/>
+                    </Grid>
+                    
+                </GroupBox>
+                <GroupBox Grid.Row="2" Header="更新设置">
+                    <Grid>
+                        <TextBlock Text="GUI for Repkg更新地址：" VerticalAlignment="Top" Margin="15,18,0,0"/>
+                        <TextBox x:Name="GUIupdateAdress" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="15,35,80,0"/>
+                        <TextBlock Text="Repkg更新地址：" VerticalAlignment="Top" Margin="15,60,0,0"/>
+                        <TextBox x:Name="RepkgupdateAdress" Text="" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="15,78,80,0"/>
+                        <Button Click="GUIupdateDefault" Content="恢复默认" HorizontalAlignment="Right" Margin="0,33,15,0" VerticalAlignment="Top" Width="60"/>
+                        <Button Click="RepkgupdateDefault" Content="恢复默认" HorizontalAlignment="Right" Margin="0,75,15,0" VerticalAlignment="Top" Width="60"/>
+                    </Grid>
+                </GroupBox>
+            </Grid>
+        </TabItem>
+        <TabItem Header="关于">
+            <Grid>
+                <GroupBox Header="关于">
+                    <Grid>
+                        <TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0" TextWrapping="Wrap" Text="GUI-for-Repkg" Height="33" FontSize="24" />
+                        <TextBlock HorizontalAlignment="Left" Margin="53,48,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="18" Text="版本：" FontWeight="Bold"/>
+                        <TextBlock HorizontalAlignment="Left" Margin="53,80,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="18" Text="作者：" FontWeight="Bold"/>
+                        
+                        <TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,120,0,0" TextWrapping="Wrap" Text="RePKG" Height="33" FontSize="24"/>
+                        <TextBlock HorizontalAlignment="Left" Margin="53,158,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="18" Text="版本：" FontWeight="Bold"/>
+                        <TextBlock x:Name="RePKGVersion" HorizontalAlignment="Left" Margin="100,158,0,0" TextWrapping="Wrap" Text="" FontSize="18" VerticalAlignment="Top"/>
+                        <TextBlock HorizontalAlignment="Left" Margin="53,190,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="18" Text="作者：" FontWeight="Bold"/>
+                        <TextBlock x:Name="RePKGdeveloper" HorizontalAlignment="Left" Margin="100,190,0,0" TextWrapping="Wrap" Text="" FontSize="18" VerticalAlignment="Top"/>
+                    </Grid>
+                </GroupBox>
+            </Grid>
+        </TabItem>
+    </TabControl>
+</Window>
