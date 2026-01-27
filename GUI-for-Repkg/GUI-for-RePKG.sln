@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11415.280 d18.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GUI-for-RePKG", "GUI-for-RePKG.csproj", "{F1946656-6DDB-002F-08F7-E9ED137BDDAD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F1946656-6DDB-002F-08F7-E9ED137BDDAD}.Debug|x64.ActiveCfg = Debug|x64
+		{F1946656-6DDB-002F-08F7-E9ED137BDDAD}.Debug|x64.Build.0 = Debug|x64
+		{F1946656-6DDB-002F-08F7-E9ED137BDDAD}.Debug|x86.ActiveCfg = Debug|x86
+		{F1946656-6DDB-002F-08F7-E9ED137BDDAD}.Debug|x86.Build.0 = Debug|x86
+		{F1946656-6DDB-002F-08F7-E9ED137BDDAD}.Release|x64.ActiveCfg = Release|x64
+		{F1946656-6DDB-002F-08F7-E9ED137BDDAD}.Release|x64.Build.0 = Release|x64
+		{F1946656-6DDB-002F-08F7-E9ED137BDDAD}.Release|x86.ActiveCfg = Release|x86
+		{F1946656-6DDB-002F-08F7-E9ED137BDDAD}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {ACE2009E-AA83-4E01-9B3D-47AC3044E202}
+	EndGlobalSection
+EndGlobal

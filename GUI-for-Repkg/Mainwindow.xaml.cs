@@ -167,16 +167,12 @@ namespace GUI_for_Repkg
         {
             if (!(sender is Grid grid)) return;
 
-            // 关键修正：如果用户直接点击的是 CheckBox，不仅不要处理 Grid 点击，
-            // 还要让 CheckBox 自己的 Click 事件去处理。
-            // CheckBox 在 VisualTree 中是 Grid 的子元素。
             if (e.OriginalSource is DependencyObject originalSource)
             {
-                // 向上查找，看点击源是否是 CheckBox 或其子元素（如 CheckBox 的文字/图形）
                 var parent = originalSource;
                 while (parent != null && parent != grid)
                 {
-                    if (parent is CheckBox) return; // 如果点的是复选框，直接退出，交给 ThumbnailCheckBox_Click
+                    if (parent is CheckBox) return; //如果点的是复选框，直接退出，交给 ThumbnailCheckBox_Click
                     parent = VisualTreeHelper.GetParent(parent);
                 }
             }
@@ -197,7 +193,7 @@ namespace GUI_for_Repkg
             else
             {
                 // 单选模式下：
-                // 1. 清除其他所有选中
+                //清除其他所有选中
                 foreach (Grid otherGrid in ThumbnailPanel.Children.OfType<Grid>())
                 {
                     var otherCb = otherGrid.Children.OfType<CheckBox>().FirstOrDefault();
@@ -217,13 +213,13 @@ namespace GUI_for_Repkg
                     }
                 }
 
-                // 2. 选中当前项
+                //选中当前项
                 checkBox.IsChecked = true;
 
-                // 加载详情
+                //加载详情
                 LoadDetail(folderPath);
             }
-            // 更新当前项的视觉（边框等）
+            //更新当前项的视觉（边框等）
             UpdateItemVisual(grid);
 
             e.Handled = true;
@@ -276,7 +272,7 @@ namespace GUI_for_Repkg
 
                 allThumbnails = thumbnails;
 
-                // 回到 UI 线程创建控件
+                //回到UI线程创建控件
                 await Dispatcher.InvokeAsync(() =>
                 {
                     ThumbnailLoader.CreateThumbnailControls(
@@ -355,7 +351,7 @@ namespace GUI_for_Repkg
                 }
             }
 
-            // 根据选中状态设置边框高亮
+            //根据选中状态设置边框高亮
             if (checkBox.IsChecked == true)
             {
                 border.BorderThickness = new Thickness(5);
@@ -378,7 +374,7 @@ namespace GUI_for_Repkg
                 var anyCb = anyGrid.Children.OfType<CheckBox>().FirstOrDefault();
                 anyCb.IsChecked = false;
             }
-            // 切换模式后更新所有视觉状态（主要是复选框可见性）
+            //切换模式后更新所有视觉状态（主要是复选框可见性）
             UpdateAllItemVisuals();
         }
 
@@ -529,8 +525,8 @@ namespace GUI_for_Repkg
 
             var progressReport = new Progress<ProcessProgressReport>(report =>
             {
-                // Progress<T> 会自动在 UI 线程上调用，这里不需要再Dispatcher.Invoke
-                SituationPresentation.Text = report.Message; 
+                //Progress<T> 会自动在 UI 线程上调用，这里不需要再Dispatcher.Invoke
+                SituationPresentation.Text = report.Message;
                 ConversionProgressBar1.Value = report.Percentage;
                 TaskBarProgress.ProgressValue = report.Percentage / 100;
                 SelectedCount.Text = $"已完成: {report.CompletedCount}/{report.TotalCount}";
@@ -768,19 +764,13 @@ namespace GUI_for_Repkg
 
         private void ApplyFilters()
         {
-            // 如果还没加载过壁纸，直接返回
+            //如果还没加载过壁纸，直接返回
             if (allThumbnails == null || allThumbnails.Count == 0) return;
 
-            // 1. 获取搜索框文本
+            //获取搜索框文本
             string searchText = WallpaperSearchBox.Text.Trim().ToLower();
 
-            // 2. 获取选中的【分级】 (遍历 Expander 里的 CheckBox)
-            // 假设你的 Expander 有个 x:Name 或者我们直接遍历 TagsListPanel 的父级兄弟
-            // 为了方便，建议给 年龄分类的 StackPanel 一个 x:Name="AgeFilterPanel"
-            // 给 标签分类的 StackPanel 一个 x:Name="TagsListPanel" (XAML里已经有了)
-
-            // 这里假设你在 XAML 里给年龄 StackPanel 加了 x:Name="AgeFilterPanel"
-            // 如果没有，你需要手动去 XAML 加上。
+            //获取选中的【分级】 (遍历 Expander 里的 CheckBox)
             var checkedRatings = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             if (AgeFilterPanel != null)
             {
@@ -793,7 +783,7 @@ namespace GUI_for_Repkg
                 }
             }
 
-            // 3. 获取选中的【标签】
+            //获取选中的【标签】
             var checkedTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             if (TagsListPanel != null)
             {
@@ -806,20 +796,19 @@ namespace GUI_for_Repkg
                 }
             }
 
-            // 4. LINQ 查询过滤
-            // 4. LINQ 查询过滤
+            //INQ 查询过滤
             var filteredList = allThumbnails.Where(item =>
             {
-                // A. 搜索文本
+                //搜索文本
                 bool matchSearch = string.IsNullOrEmpty(searchText) ||
                                    item.Title.ToLower().Contains(searchText);
 
-                // B. 分级过滤 (强力兼容模式)
+                //分级过滤 (强力兼容模式)
                 string itemRating = string.IsNullOrEmpty(item.ContentRating) ? "everyone" : item.ContentRating.ToLower();
-                // 确保 checkedRatings 里的值也都是小写
+                //确保 checkedRatings 里的值也都是小写
                 bool matchRating = checkedRatings.Any(r => r.Equals(itemRating, StringComparison.OrdinalIgnoreCase));
 
-                // C. 标签过滤
+                //标签过滤
                 bool matchTags = false;
                 if (item.Tags == null || item.Tags.Count == 0)
                 {
@@ -828,15 +817,14 @@ namespace GUI_for_Repkg
                 }
                 else
                 {
-                    // 只要壁纸拥有的标签中，有一个是在已选列表里的，就返回 true
+                    //只要壁纸拥有的标签中，有一个是在已选列表里的，就返回 true
                     matchTags = item.Tags.Any(t => checkedTags.Contains(t));
                 }
 
                 return matchSearch && matchRating && matchTags;
             }).ToList();
 
-            // 5. 更新 UI
-            // 注意：这里复用了你现有的 CreateThumbnailControls
+            //更新 UI
             ThumbnailLoader.CreateThumbnailControls(
                 filteredList,
                 ThumbnailPanel,
@@ -844,10 +832,10 @@ namespace GUI_for_Repkg
                 ThumbnailItem_PreviewMouseLeftButtonDown,
                 ThumbnailCheckBox_Click);
 
-            // 6. 更新底部状态栏文字
+            //更新底部状态栏文字
             SituationPresentation.Text = $"筛选显示 {filteredList.Count} / {allThumbnails.Count} 个壁纸";
 
-            // 7. 处理阴影 (保持你原有的逻辑)
+            //处理阴影
             if (_isShadowEnabled) EnableAllThumbnailShadows();
             else DisableAllThumbnailShadows();
         }

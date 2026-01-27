@@ -26,14 +26,14 @@ namespace GUI_for_Repkg.Models
             if (string.IsNullOrWhiteSpace(rawName))
                 rawName = "未命名";
 
-            // 替换Windows文件夹名非法字符
+            //替换Windows文件夹名非法字符
             char[] invalidChars = Path.GetInvalidFileNameChars();
             foreach (char c in invalidChars)
             {
                 rawName = rawName.Replace(c, '_');
             }
 
-            // 去除首尾空格和点
+            //去除首尾空格和点
             rawName = rawName.Trim().TrimEnd('.');
 
             if (string.IsNullOrEmpty(rawName))
@@ -196,15 +196,15 @@ namespace GUI_for_Repkg.Models
                     }
                     catch (AggregateException ae)
                     {
-                        // 检查里面是否包含“取消异常”
-                        // Flatten() 会把嵌套的异常摊平
+                        //检查里面是否包含“取消异常”
+                        //Flatten() 会把嵌套的异常摊平
                         ae.Handle(ex =>
                         {
                             return ex is OperationCanceledException; // 如果是取消异常，视为“已处理”
                         });
 
-                        // 如果全是取消异常，Handle 会处理掉；如果有其他错误，Handle 会重新抛出
-                        // 手动抛出一个干净的 OperationCanceledException 给 MainWindow 捕获
+                        //如果全是取消异常，Handle 会处理掉；如果有其他错误，Handle 会重新抛出
+                        //手动抛出一个干净的 OperationCanceledException 给 MainWindow 捕获
                         throw new OperationCanceledException();
                     }
                     catch (OperationCanceledException)
