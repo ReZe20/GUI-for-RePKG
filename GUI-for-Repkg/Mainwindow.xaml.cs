@@ -539,12 +539,12 @@ namespace GUI_for_Repkg
                     repkgExePath,
                     outputPath,
                     threadCount,
+                    true,
                     _cts.Token,
                     _pauseEvent,
                     progressReport);
 
                 MessageBox.Show("所有壁纸处理完成！", "完成", MessageBoxButton.OK, MessageBoxImage.Information);
-                UnenabledSettingCheckbox();
             }
             catch (OperationCanceledException)
             {
@@ -838,6 +838,26 @@ namespace GUI_for_Repkg
             //处理阴影
             if (_isShadowEnabled) EnableAllThumbnailShadows();
             else DisableAllThumbnailShadows();
+        }
+
+        private void WallpaperFile_PreciewDragover(object sender, DragEventArgs e)
+        {
+            e.Effects = DragDropEffects.Copy;
+            e.Handled = true;
+        }
+
+        private void WallpapersFile_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                if (files.Length > 0)
+                {
+                    string droppedPath = files[0];
+                    OneWallpaperFile.Text = droppedPath;
+                }
+            }
         }
 
         private void RestoreDefaultWallpapersPath_Click(object sender, RoutedEventArgs e)

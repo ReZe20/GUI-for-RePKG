@@ -206,8 +206,8 @@
                             </Grid.RowDefinitions>
                             <GroupBox Header="单个壁纸">
                                 <Grid>
-                                    <TextBox HorizontalAlignment="Stretch" Margin="63,10,182,0" TextWrapping="NoWrap" VerticalAlignment="Top" MinWidth="10"/>
-                                    <TextBox HorizontalAlignment="Stretch" Margin="63,39,182,0" TextWrapping="NoWrap" VerticalAlignment="Top" MinWidth="10"/>
+                                    <TextBox x:Name="OneWallpaperFile" AllowDrop="True" Drop="WallpapersFile_Drop" PreviewDragOver="WallpaperFile_PreciewDragover" HorizontalAlignment="Stretch" Margin="63,10,182,0" TextWrapping="NoWrap" VerticalAlignment="Top" MinWidth="10"/>
+                                    <TextBox x:Name="OneOutputPath" HorizontalAlignment="Stretch" Margin="63,39,182,0" TextWrapping="NoWrap" VerticalAlignment="Top" MinWidth="10"/>
                                     <Button Content="选择壁纸" HorizontalAlignment="Right" Margin="0,9,110,0" VerticalAlignment="Top" Click="Button_Click_2" Width="65"/>
                                     <Button Content="输出路径" HorizontalAlignment="Right" Margin="0,38,110,0" VerticalAlignment="Top" Click="Button_Click_3" Width="65"/>
                                     <TextBlock HorizontalAlignment="Left" Margin="12,11,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="zh-cn" Text="壁纸路径"/></TextBlock>

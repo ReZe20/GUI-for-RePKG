@@ -47,6 +47,7 @@ namespace GUI_for_Repkg.Models
             string exePath,
             string outputRootPath,
             int maxDegreeOfParallelism,
+            bool wallpaperengineOutputMode,
             CancellationToken token,
             ManualResetEventSlim pauseEvent, 
             IProgress<ProcessProgressReport> progressReport = null)
@@ -77,7 +78,9 @@ namespace GUI_for_Repkg.Models
             string coverAllFiles = mainWindow?.CoverAllFiles.IsChecked == true ? " --overwrite" : "";
             //将project.json文件复制到输出文件夹
             string copyProjectJson = mainWindow?.CopyProjectJson.IsChecked == true ? " -c" : "";
-
+            //判断是否从“已有壁纸”导入
+            string outputMode = wallpaperengineOutputMode ? "\\scene.pkg" : "";
+            
             string SettingOptions = justSaveImages + dontTransfornTexFiles + putAllFilesInOneFolder + coverAllFiles + copyProjectJson;
 
             await Task.Run(() =>
@@ -124,11 +127,10 @@ namespace GUI_for_Repkg.Models
 
                         Directory.CreateDirectory(tempOutputPath);
 
-                        // 添加双引号防止路径中含有空格导致命令行解析错误
                         var startInfo = new ProcessStartInfo
                         {
                             FileName = exePath,
-                            Arguments = $"extract -o {tempOutputPath} {SettingOptions} {folder}\\scene.pkg",
+                            Arguments = $"extract -o \"{tempOutputPath}\" {SettingOptions} \"{folder}{outputMode}\"",
                             UseShellExecute = false,
                             CreateNoWindow = true
                         };
