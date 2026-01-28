@@ -14,6 +14,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 using System.Windows.Shell;
 using System.Windows.Threading;
 using static GUI_for_Repkg.Models.ProcessLauncher;
@@ -32,9 +33,9 @@ namespace GUI_for_Repkg
         string repkgExePath = @"RePKG.exe";
         private List<ThumbnailInfo> allThumbnails = new List<ThumbnailInfo>();
 
-        private static readonly SolidColorBrush NativeGreen = new SolidColorBrush(Color.FromRgb(6, 176, 37));  // 正常绿
-        private static readonly SolidColorBrush NativeYellow = new SolidColorBrush(Color.FromRgb(255, 189, 0)); // 暂停黄
-        private static readonly SolidColorBrush NativeRed = new SolidColorBrush(Color.FromRgb(204, 0, 0));    // 错误红
+        private static readonly SolidColorBrush NativeGreen = new SolidColorBrush(Color.FromRgb(6, 176, 37));  //正常绿
+        private static readonly SolidColorBrush NativeYellow = new SolidColorBrush(Color.FromRgb(255, 189, 0)); //暂停黄
+        private static readonly SolidColorBrush NativeRed = new SolidColorBrush(Color.FromRgb(204, 0, 0));    //错误红
 
         public List<int> ThreadNumbers { get; set; } = new List<int>();
 
@@ -45,6 +46,8 @@ namespace GUI_for_Repkg
         private CancellationTokenSource _cts;
         private ManualResetEventSlim _pauseEvent;
         private bool _isPaused = false;
+
+        private HashSet<string> _pendingFiles = new HashSet<string>();
 
         public MainWindow()
         {
@@ -79,14 +82,17 @@ namespace GUI_for_Repkg
             {
                 case "Normal":
                     ConversionProgressBar1.Foreground = NativeGreen;
+                    ConversionProgressBar2.Foreground = NativeGreen;
                     TaskBarProgress.ProgressState = TaskbarItemProgressState.Normal;
                     break;
                 case "Paused":
                     ConversionProgressBar1.Foreground = NativeYellow;
+                    ConversionProgressBar2.Foreground = NativeYellow;
                     TaskBarProgress.ProgressState = TaskbarItemProgressState.Paused;
                     break;
                 case "Error":
                     ConversionProgressBar1.Foreground = NativeRed;
+                    ConversionProgressBar2.Foreground = NativeRed;
                     TaskBarProgress.ProgressState = TaskbarItemProgressState.Error;
                     break;
             }
@@ -402,7 +408,7 @@ namespace GUI_for_Repkg
         {
             try
             {
-                string jsonPath = Path.Combine(folderPath, "project.json");
+                string jsonPath = System.IO.Path.Combine(folderPath, "project.json");
                 if (!File.Exists(jsonPath)) return;
 
                 JObject json = JObject.Parse(File.ReadAllText(jsonPath));
@@ -416,7 +422,7 @@ namespace GUI_for_Repkg
 
                 if (!string.IsNullOrEmpty(previewFile))
                 {
-                    string fullPreviewPath = Path.Combine(folderPath, previewFile);
+                    string fullPreviewPath = System.IO.Path.Combine(folderPath, previewFile);
                     if (File.Exists(fullPreviewPath))
                     {
                         var bitmap = new BitmapImage();
@@ -470,6 +476,7 @@ namespace GUI_for_Repkg
             CoverAllFiles.IsEnabled = (!CoverAllFiles.IsEnabled);
             CopyProjectJson.IsEnabled = (!CopyProjectJson.IsEnabled);
             multithreading.IsEnabled = (!multithreading.IsEnabled);
+            cmbThreadCount.IsEnabled = (!cmbThreadCount.IsEnabled);
         }
 
         private async void StartProcess_Click(object sender, RoutedEventArgs e)
@@ -507,7 +514,7 @@ namespace GUI_for_Repkg
                 }
                 catch
                 {
-                    MessageBox.Show("无法创建输出目录，请检查权限或手动创建。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("无法创建输出目录，请检查权限或手动创建。","错误", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
             }
@@ -525,9 +532,10 @@ namespace GUI_for_Repkg
 
             var progressReport = new Progress<ProcessProgressReport>(report =>
             {
-                //Progress<T> 会自动在 UI 线程上调用，这里不需要再Dispatcher.Invoke
+                //Progress<T>会自动在UI线程上调用，这里不需要再Dispatcher.Invoke
                 SituationPresentation.Text = report.Message;
                 ConversionProgressBar1.Value = report.Percentage;
+                ConversionProgressBar2.Foreground = NativeRed;
                 TaskBarProgress.ProgressValue = report.Percentage / 100;
                 SelectedCount.Text = $"已完成: {report.CompletedCount}/{report.TotalCount}";
             });
@@ -572,8 +580,11 @@ namespace GUI_for_Repkg
                 _isPaused = true;
                 SituationPresentation.Text = " 任务已暂停...";
 
-                BtnPause.IsEnabled = false;
-                BtnResume.IsEnabled = true;
+                BtnPause1.IsEnabled = false;
+                BtnPause2.IsEnabled = false;
+
+                BtnResume1.IsEnabled = true;
+                BtnResume2.IsEnabled = true;
                 UpdateProgressState("Paused");
             }
         }
@@ -586,8 +597,11 @@ namespace GUI_for_Repkg
                 _isPaused = false;
                 SituationPresentation.Text = "任务已恢复...";
 
-                BtnPause.IsEnabled = true;
-                BtnResume.IsEnabled = false;
+                BtnPause1.IsEnabled = true;
+                BtnPause2.IsEnabled = true;
+
+                BtnResume1.IsEnabled = false;
+                BtnResume2.IsEnabled = false;
                 UpdateProgressState("Normal");
             }
         }
@@ -618,9 +632,14 @@ namespace GUI_for_Repkg
         {
             StartProcessButton.IsEnabled = !isRunning;
 
-            BtnStop.IsEnabled = isRunning;
-            BtnPause.IsEnabled = isRunning;
-            BtnResume.IsEnabled = false;
+            BtnStop1.IsEnabled = isRunning;
+            BtnStop2.IsEnabled = isRunning;
+
+            BtnPause1.IsEnabled = isRunning;
+            BtnPause2.IsEnabled = isRunning;
+
+            BtnResume1.IsEnabled = false;
+            BtnResume2.IsEnabled = false;
         }
 
         private void PopulateThreadCount()
@@ -641,6 +660,7 @@ namespace GUI_for_Repkg
             {
                 multithreading.IsChecked = false;
                 multithreading.IsEnabled = false;
+                cmbThreadCount.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -690,7 +710,7 @@ namespace GUI_for_Repkg
         {
             try
             {
-                OutputPathBox.Text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "GUI-for-Repkg_Output");
+                OutputPathBox.Text = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "GUI-for-Repkg_Output");
             }
             catch
             {
@@ -700,27 +720,29 @@ namespace GUI_for_Repkg
 
         private void SettleOutputPathBox(object sender, RoutedEventArgs e)
         {
-            try
+            bool isPathValid = false;
+
+            while (!isPathValid)
             {
-                var fileDialog = new OpenFileDialog
+                var dialog = new OpenFolderDialog
                 {
-                    Title = "请选择输出文件夹",
-                    InitialDirectory = OutputPathBox.Text,
-                    FileName = "请选择文件夹",
-                    CheckFileExists = false,
-                    CheckPathExists = true,
-                    ValidateNames = false
+                    Title = "选择文件夹",
+                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures)
                 };
 
-                if (fileDialog.ShowDialog() == true)
+                if (dialog.ShowDialog() == true)
                 {
-                    string selectedFolder = Path.GetDirectoryName(fileDialog.FileName);
-                    OutputPathBox.Text = selectedFolder;
+                    if (dialog.FolderName.Contains(" "))
+                    {
+                        MessageBox.Show($"请勿选择带有空格路径", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        isPathValid = true;
+                        OutputPathBox.Text = dialog.FolderName;
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"选择文件夹时发生错误：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                else break;//点击取消便退出循环
             }
         }
 
@@ -770,7 +792,7 @@ namespace GUI_for_Repkg
             //获取搜索框文本
             string searchText = WallpaperSearchBox.Text.Trim().ToLower();
 
-            //获取选中的【分级】 (遍历 Expander 里的 CheckBox)
+            //获取选中的(遍历Expander里的CheckBox)
             var checkedRatings = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             if (AgeFilterPanel != null)
             {
@@ -842,22 +864,509 @@ namespace GUI_for_Repkg
 
         private void WallpaperFile_PreciewDragover(object sender, DragEventArgs e)
         {
-            e.Effects = DragDropEffects.Copy;
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] paths = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                //检查第一个元素是否为文件
+                if (paths != null && paths.Length > 0 && File.Exists(paths[0]))
+                {
+                    e.Effects = DragDropEffects.Copy; //显示“复制”图标
+                }
+                else
+                {
+                    e.Effects = DragDropEffects.None; //显示“禁止”图标
+                }
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+
+            // 标记为已处理，防止 TextBox 原生逻辑干扰
             e.Handled = true;
         }
 
-        private void WallpapersFile_Drop(object sender, DragEventArgs e)
+        private void WallpaperFile_Drop(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-
+                if (files.Contains(" "))
+                {
+                    MessageBox.Show(
+                    $"拖入的路径包含空格：\n\n\"{files}\"\n\nRePKG 无法处理带空格的路径，请移动文件夹后再拖入。",
+                    "路径非法",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                    return;
+                }
                 if (files.Length > 0)
                 {
                     string droppedPath = files[0];
                     OneWallpaperFile.Text = droppedPath;
+                    foreach (var t in files)
+                    {
+                        AddFileToUIList(t);
+                    }
                 }
             }
+        }
+
+        private void OneWallpaperFileBoxChanged(object sender, TextChangedEventArgs e)
+        {
+            if (System.IO.Path.IsPathRooted(OneWallpaperFile.Text))
+            {
+                OneOutputPath.Text = System.IO.Path.GetDirectoryName(OneWallpaperFile.Text) + "\\Output";
+                TurnOffWallpaperFolder();
+            }
+            else
+            {
+                OneOutputPath.Text = "";
+                TurnOnWallpaperFolder();
+            }
+        }
+
+        private void ChooseOneWallpaper_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog
+            {
+                Multiselect = true,
+                Filter = "Wallpaper Engine 包文件 (*.pkg;*.mpkg)|*.pkg;*.mpkg"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                foreach (var file in dialog.FileNames)
+                {
+                    if (!file.Contains(" ")) AddFileToUIList(file);
+                    else MessageBox.Show($"跳过含空格路径: {file}");
+                }
+            }
+        }
+
+        private void AddFileToUIList(string filePath)
+        {
+            if (_pendingFiles.Contains(filePath)) return;
+            _pendingFiles.Add(filePath);
+
+            Border itemBorder = new Border
+            {
+                Margin = new Thickness(0, 2, 0, 2),
+                Padding = new Thickness(10, 5, 5, 5),
+                Background = new SolidColorBrush(Color.FromRgb(45, 45, 45)),
+                Tag = filePath
+            };
+
+
+            DockPanel dock = new DockPanel { LastChildFill = true };
+
+            Button btnDelete = new Button
+            {
+                Content = "❌",
+                Width = 24,
+                Height = 24,
+                Margin = new Thickness(5, 0, 0, 0),
+                Background = Brushes.Transparent,
+                Foreground = Brushes.Gray,
+                BorderThickness = new Thickness(0),
+                FontSize = 14,
+                Cursor = Cursors.Hand
+            };
+            DockPanel.SetDock(btnDelete, Dock.Right);
+
+            btnDelete.Click += (s, e) => 
+            {
+                _pendingFiles.Remove(filePath);
+                SelectedFilesPanel.Children.Remove(itemBorder);
+            };
+
+            //左侧：文件名显示
+            TextBlock txtName = new TextBlock
+            {
+                Text = filePath,
+                Foreground = Brushes.White,
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+
+            dock.Children.Add(btnDelete);
+            dock.Children.Add(txtName);
+            itemBorder.Child = dock;
+
+            SelectedFilesPanel.Children.Add(itemBorder);
+        }
+
+        private void ChooseOneWallpaperOutputPath(object sender, RoutedEventArgs e)
+        {
+            bool isFileValid = false;
+
+            while (!isFileValid)
+            {
+                OpenFolderDialog openFileDialog = new OpenFolderDialog();
+
+                openFileDialog.Title = "请选择输出目录";
+
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    string selectedFile = openFileDialog.FolderName;
+                    if (selectedFile.Contains(" "))
+                    {
+                        MessageBox.Show(
+                            $"请勿选择包含空格的文件夹路径：\n{selectedFile}\n",
+                            "路径不合法",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        isFileValid = true;
+                        OneOutputPath.Text = selectedFile;
+                    }
+                }
+                else return;
+            }
+        }
+
+        private void ChooseOneWallpaperFileOutputPath(object sender, RoutedEventArgs e)
+        {
+            bool isFileValid = false;
+
+            while (!isFileValid)
+            {
+                OpenFolderDialog openFileDialog = new OpenFolderDialog();
+
+                openFileDialog.Title = "请选择输出目录";
+
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    string selectedFile = openFileDialog.FolderName;
+                    if (selectedFile.Contains(" "))
+                    {
+                        MessageBox.Show(
+                            $"请勿选择包含空格的文件夹路径：\n{selectedFile}\n",
+                            "路径不合法",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        isFileValid = true;
+                        MultipleWallpaperFilesOutputPath.Text = selectedFile;
+                    }
+                }
+                else return;
+            }
+        }
+
+        private async void OneWallpaperOutput_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateProgressState("Normal");
+
+            IEnumerable<string> selectedItems = Enumerable.Empty<string>();
+            List<string> folderList = selectedItems.ToList();
+            folderList.Add(OneWallpaperFile.Text);
+            selectedItems = folderList;
+
+            if (!File.Exists(repkgExePath))
+            {
+                MessageBox.Show($"找不到{repkgExePath}，请检查路径是否正确", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            string outputPath = OneOutputPath.Text;
+
+            if (!Directory.Exists(outputPath))
+            {
+                try
+                {
+                    Directory.CreateDirectory(outputPath);
+                }
+                catch
+                {
+                    MessageBox.Show("无法创建输出目录，请检查权限或手动创建。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+            }
+
+            _cts = new CancellationTokenSource();
+            _pauseEvent = new ManualResetEventSlim(true); // true 表示初始状态为“运行中”（非暂停）
+            _isPaused = false;
+
+            ToggleControlButtons(true);
+            UnenabledSettingCheckbox();
+
+            int threadCount = multithreading.IsChecked == true ? (int)cmbThreadCount.SelectedItem : 1;
+
+            var progressReport = new Progress<ProcessProgressReport>(report =>
+            {
+                //Progress<T>会自动在UI线程上调用，这里不需要再Dispatcher.Invoke
+                SituationPresentation.Text = report.Message;
+                ConversionProgressBar1.Value = report.Percentage;
+                ConversionProgressBar2.Value = report.Percentage;
+                TaskBarProgress.ProgressValue = report.Percentage / 100;
+                SelectedCount.Text = $"已完成: {report.CompletedCount}/{report.TotalCount}";
+            });
+
+            try
+            {
+                await ProcessLauncher.LaunchAsync(
+                    selectedItems,
+                    repkgExePath,
+                    outputPath,
+                    threadCount,
+                    false,
+                    _cts.Token,
+                    _pauseEvent,
+                    progressReport);
+
+                MessageBox.Show("所有壁纸处理完成！", "完成", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (OperationCanceledException)
+            {
+                SituationPresentation.Text = "提取已停止";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"处理过程中发生错误：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                SituationPresentation.Text = "处理失败";
+                UpdateProgressState("Error");
+                UnenabledSettingCheckbox();
+            }
+            finally
+            {
+                UnenabledSettingCheckbox();
+                ToggleControlButtons(false);
+            }
+        }
+
+        private void WallpapersFolder_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] folders = (string[])e.Data.GetData(DataFormats.FileDrop);
+                string droppedPath = folders[0];
+
+                if (droppedPath.Contains(" "))
+                {
+                    MessageBox.Show("根路径不能含空格"); 
+                    return;
+                }
+
+                MultipleWallpaperFiles.Text = droppedPath;
+
+                var files = Directory.GetFiles(droppedPath, "*.*", SearchOption.AllDirectories)
+                    .Where(f => f.EndsWith(".pkg") || f.EndsWith(".mpkg"));
+
+                foreach (var f in files)
+                {
+                    AddFileToUIList(f);
+                }
+            }
+        }
+
+        private void WallpaperFolder_PreciewDragover(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] paths = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                //检查第一个元素是否为文件夹
+                if (paths != null && paths.Length > 0 && !File.Exists(paths[0]))
+                {
+                    e.Effects = DragDropEffects.Copy;//显示“复制”图标
+                }
+                else
+                {
+                    e.Effects = DragDropEffects.None;//显示“禁止”图标
+                }
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+
+            e.Handled = true;
+        }
+
+        private void ChooseOneWallpaperFolder_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFolderDialog();
+            if (dialog.ShowDialog() == true)
+            {
+                string root = dialog.FolderName;
+                if (root.Contains(" ")) { MessageBox.Show("根路径不能含空格"); return; }
+
+                var files = Directory.GetFiles(root, "*.*", SearchOption.AllDirectories)
+                    .Where(f => f.EndsWith(".pkg") || f.EndsWith(".mpkg"));
+
+                foreach (var f in files)
+                {
+                    AddFileToUIList(f);
+                }
+            }
+        }
+
+        private void ChooseOneWallpaperFolderOutputPath(object sender, RoutedEventArgs e)
+        {
+            bool isFileValid = false;
+
+            while (!isFileValid)
+            {
+                OpenFolderDialog openFileDialog = new OpenFolderDialog();
+
+                openFileDialog.Title = "请选择输出目录";
+
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    string selectedFile = openFileDialog.FolderName;
+                    if (selectedFile.Contains(" "))
+                    {
+                        MessageBox.Show(
+                            $"请勿选择包含空格的文件夹路径：\n{selectedFile}\n",
+                            "路径不合法",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        isFileValid = true;
+                        MultipleWallpaperFilesOutputPath.Text = selectedFile;
+                    }
+                }
+                else return;
+            }
+        }
+
+        private void MultipleWallpaperFilesBoxChanged(object sender, TextChangedEventArgs e)
+        {
+            if (System.IO.Path.IsPathRooted(MultipleWallpaperFiles.Text))
+            {
+                MultipleWallpaperFilesOutputPath.Text = MultipleWallpaperFiles.Text + "\\Output";
+            }
+            else
+            {
+                MultipleWallpaperFilesOutputPath.Text = "";
+            }
+        }
+
+        private void FolderOutputChangedCheck(object sender, TextChangedEventArgs e)
+        {
+            if (OneOutputPath.Text != "")
+            {
+                TurnOffWallpaperFile();
+            }
+            else TurnOnWallpaperFile();
+        }
+
+        private void FileOutputChangedCheck(object sender, TextChangedEventArgs e)
+        {
+            if (OneOutputPath.Text != "")
+            {
+                TurnOffWallpaperFolder();
+            }
+            else TurnOnWallpaperFolder();
+        }
+
+        private async void StartConvert_Click(object sender, RoutedEventArgs e)
+        {
+            if (_pendingFiles.Count == 0) return;
+
+            if (!File.Exists(repkgExePath))
+            {
+                MessageBox.Show($"找不到 {repkgExePath}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            string outputPath = "";
+            if (OneOutputPath.Text != "" && MultipleWallpaperFilesOutputPath.Text != "")
+            {
+                MessageBox.Show($"没有输出目录！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            else
+            {
+                outputPath = OneOutputPath.Text != "" ? OneOutputPath.Text : MultipleWallpaperFilesOutputPath.Text;
+            }
+
+            StartConvertButton.IsEnabled = false;
+            UpdateProgressState("Normal");
+
+            _cts = new CancellationTokenSource();
+            _pauseEvent = new ManualResetEventSlim(true);
+            _isPaused = false;
+
+            var progress = new Progress<ProcessProgressReport>(report =>
+            {
+                SituationPresentation.Text = report.Message;
+                ConversionProgressBar1.Value = report.Percentage;
+                ConversionProgressBar2.Value = report.Percentage; // 假设你有两个进度条
+                SelectedCount.Text = $"正在处理: {report.CompletedCount}/{report.TotalCount}";
+            });
+
+            try 
+            {
+                int threadCount = multithreading.IsChecked == true ? (int)cmbThreadCount.SelectedItem : 1;
+
+                await ProcessLauncher.LaunchAsync(
+                    _pendingFiles.ToList(),
+                    repkgExePath,
+                    outputPath,
+                    threadCount,
+                    false,
+                    _cts.Token,
+                    _pauseEvent,
+                    progress);
+
+                MessageBox.Show("转换队列执行完毕！", "完成", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (OperationCanceledException)
+            {
+                SituationPresentation.Text = "任务已被用户停止";
+                UpdateProgressState("Error");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"处理过程中出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                UpdateProgressState("Error");
+            }
+            finally
+            {
+                // 7. 恢复 UI 状态
+                StartConvertButton.IsEnabled = true;
+                ConversionProgressBar1.Value = 0;
+                ConversionProgressBar2.Value = 0;
+            }
+        }
+
+        private void TurnOffWallpaperFile()
+        {
+            OneWallpaperFile.IsEnabled = false;
+            OneOutputPath.IsEnabled = false;
+            OneWallpaperChooseButton.IsEnabled = false;
+            OneWallpaperOutPathButton.IsEnabled = false;
+        }
+
+        private void TurnOnWallpaperFile()
+        {
+            OneWallpaperFile.IsEnabled = true;
+            OneOutputPath.IsEnabled = true;
+            OneWallpaperChooseButton.IsEnabled = true;
+            OneWallpaperOutPathButton.IsEnabled = true;
+        }
+        private void TurnOffWallpaperFolder()
+        {
+            MultipleWallpaperFiles.IsEnabled = false;
+            MultipleWallpaperFilesOutputPath.IsEnabled = false;
+            FolderChooseButton.IsEnabled = false;
+            FolderOutputPathButton.IsEnabled = false;
+        }
+
+        private void TurnOnWallpaperFolder()
+        {
+            MultipleWallpaperFiles.IsEnabled = true;
+            MultipleWallpaperFilesOutputPath.IsEnabled = true;
+            FolderChooseButton.IsEnabled = true;
+            FolderOutputPathButton.IsEnabled = true;
         }
 
         private void RestoreDefaultWallpapersPath_Click(object sender, RoutedEventArgs e)

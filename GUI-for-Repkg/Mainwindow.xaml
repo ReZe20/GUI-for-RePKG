@@ -161,7 +161,7 @@
                                 </Border>
 
                             </Grid>
-                            <Button Click="BtnStop_Click" x:Name="BtnStop" Grid.Column="2" Content="🛑" IsEnabled="False" HorizontalAlignment="Right" Height="20" Margin="0,0,1,0" Width="20" Background="#FFDDDDDD" VerticalAlignment="Bottom" Foreground="Red" ToolTipService.InitialShowDelay="200" ToolTipService.ShowDuration="60000" Cursor="Hand">
+                            <Button Click="BtnStop_Click" x:Name="BtnStop1" Grid.Column="2" Content="🛑" IsEnabled="False" HorizontalAlignment="Right" Height="20" Margin="0,0,1,0" Width="20" Background="#FFDDDDDD" VerticalAlignment="Bottom" Foreground="Red" ToolTipService.InitialShowDelay="200" ToolTipService.ShowDuration="60000" Cursor="Hand">
                                 <Button.ToolTip>
                                     <ToolTip>
                                         <StackPanel Width="220">
@@ -172,7 +172,7 @@
                                 </Button.ToolTip>
                             </Button>
 
-                            <Button Click="BtnPause_Click" x:Name="BtnPause" Grid.Column="2" Content="⏸" IsEnabled="False" HorizontalAlignment="Right" Height="20" Margin="0,0,23,0" Width="20" Background="#FFDDDDDD" VerticalAlignment="Bottom" Foreground="Blue" ToolTipService.InitialShowDelay="200" ToolTipService.ShowDuration="60000" Cursor="Hand">
+                            <Button Click="BtnPause_Click" x:Name="BtnPause1" Grid.Column="2" Content="⏸" IsEnabled="False" HorizontalAlignment="Right" Height="20" Margin="0,0,23,0" Width="20" Background="#FFDDDDDD" VerticalAlignment="Bottom" Foreground="Blue" ToolTipService.InitialShowDelay="200" ToolTipService.ShowDuration="60000" Cursor="Hand">
                                 <Button.ToolTip>
                                     <ToolTip>
                                         <StackPanel Width="220">
@@ -183,7 +183,7 @@
                                 </Button.ToolTip>
                             </Button>
 
-                            <Button Click="BtnResume_Click" x:Name="BtnResume" Grid.Column="2" Content="▶" IsEnabled="False" HorizontalAlignment="Right" Height="20" Margin="0,0,45,0" Width="20" Background="#FFDDDDDD" VerticalAlignment="Bottom" Foreground="Green" ToolTipService.InitialShowDelay="200" ToolTipService.ShowDuration="60000" Cursor="Hand">
+                            <Button Click="BtnResume_Click" x:Name="BtnResume1" Grid.Column="2" Content="▶" IsEnabled="False" HorizontalAlignment="Right" Height="20" Margin="0,0,45,0" Width="20" Background="#FFDDDDDD" VerticalAlignment="Bottom" Foreground="Green" ToolTipService.InitialShowDelay="200" ToolTipService.ShowDuration="60000" Cursor="Hand">
                                 <Button.ToolTip>
                                     <ToolTip>
                                         <StackPanel Width="220">
@@ -204,35 +204,63 @@
                                 <RowDefinition Height="60*"/>
                                 <RowDefinition Height="22"/>
                             </Grid.RowDefinitions>
-                            <GroupBox Header="单个壁纸">
+                            <GroupBox Header="导入壁纸">
                                 <Grid>
-                                    <TextBox x:Name="OneWallpaperFile" AllowDrop="True" Drop="WallpapersFile_Drop" PreviewDragOver="WallpaperFile_PreciewDragover" HorizontalAlignment="Stretch" Margin="63,10,182,0" TextWrapping="NoWrap" VerticalAlignment="Top" MinWidth="10"/>
-                                    <TextBox x:Name="OneOutputPath" HorizontalAlignment="Stretch" Margin="63,39,182,0" TextWrapping="NoWrap" VerticalAlignment="Top" MinWidth="10"/>
-                                    <Button Content="选择壁纸" HorizontalAlignment="Right" Margin="0,9,110,0" VerticalAlignment="Top" Click="Button_Click_2" Width="65"/>
-                                    <Button Content="输出路径" HorizontalAlignment="Right" Margin="0,38,110,0" VerticalAlignment="Top" Click="Button_Click_3" Width="65"/>
+                                    <TextBox x:Name="OneWallpaperFile"
+                                             AllowDrop="True" 
+                                             Drop="WallpaperFile_Drop" 
+                                             PreviewDragOver="WallpaperFile_PreciewDragover" 
+                                             TextChanged="OneWallpaperFileBoxChanged"
+                                             HorizontalAlignment="Stretch" 
+                                             Margin="63,10,73,0" 
+                                             TextWrapping="NoWrap" 
+                                             VerticalAlignment="Top" 
+                                             MinWidth="10"/>
+                                    <TextBox x:Name="OneOutputPath" TextChanged="FileOutputChangedCheck" HorizontalAlignment="Stretch" Margin="63,39,73,0" TextWrapping="NoWrap" VerticalAlignment="Top" MinWidth="10"/>
+                                    <Button Content="选择文件" x:Name="OneWallpaperChooseButton" Click="ChooseOneWallpaper_Click" HorizontalAlignment="Right" Margin="0,9,0,0" VerticalAlignment="Top" Width="65"/>
+                                    <Button Content="输出路径" x:Name="OneWallpaperOutPathButton" Click="ChooseOneWallpaperOutputPath" HorizontalAlignment="Right" Margin="0,38,0,0" VerticalAlignment="Top" Width="65"/>
                                     <TextBlock HorizontalAlignment="Left" Margin="12,11,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="zh-cn" Text="壁纸路径"/></TextBlock>
                                     <TextBlock HorizontalAlignment="Left" Margin="12,40,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="zh-cn" Text="输出路径"/></TextBlock>
-                                    <Button Content="输出" HorizontalAlignment="Right" Margin="0,9,3,0" VerticalAlignment="Top" Height="48" MinWidth="100" Click="Button_Click_4"/>
                                 </Grid>
                             </GroupBox>
-                            <GroupBox Header="多个壁纸" Grid.Row="1">
+                            <GroupBox Header="导入文件夹" Grid.Row="1">
                                 <Grid>
                                     <TextBlock Text="文件夹路径" HorizontalAlignment="Left" Margin="0,11,0,0" VerticalAlignment="Top"/>
-                                    <TextBox HorizontalAlignment="Stretch" Margin="63,10,182,0" TextWrapping="NoWrap" VerticalAlignment="Top" MinWidth="10"/>
+                                    <TextBox 
+                                        x:Name="MultipleWallpaperFiles"
+                                        AllowDrop="True"
+                                        HorizontalAlignment="Stretch" 
+                                        Margin="63,10,73,0" 
+                                        TextWrapping="NoWrap" 
+                                        VerticalAlignment="Top" 
+                                        MinWidth="10"
+                                        Drop="WallpapersFolder_Drop" 
+                                        PreviewDragOver="WallpaperFolder_PreciewDragover" 
+                                        TextChanged="MultipleWallpaperFilesBoxChanged"/>
                                     <TextBlock HorizontalAlignment="Left" Margin="12,40,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="zh-cn" Text="输出路径"/></TextBlock>
-                                    <TextBox HorizontalAlignment="Stretch" Margin="63,39,182,0" TextWrapping="NoWrap" VerticalAlignment="Top" MinWidth="10"/>
-                                    <Button Content="选择文件夹" HorizontalAlignment="Right" Margin="0,9,110,0" VerticalAlignment="Top" Click="Button_Click_2" Width="65"/>
-                                    <Button Content="输出路径" HorizontalAlignment="Right" Margin="0,38,110,0" VerticalAlignment="Top" Click="Button_Click_3" Width="65"/>
-                                    <Button Content="输出" HorizontalAlignment="Right" Margin="0,9,3,0" VerticalAlignment="Top" Height="48" MinWidth="100" Click="Button_Click_4"/>
-                                    <Grid Margin="0,62,0,0">
-                                        <Border>
-                                            <ScrollViewer VerticalScrollBarVisibility="Auto"/>
-                                        </Border>
-                                    </Grid>
+                                    <TextBox x:Name="MultipleWallpaperFilesOutputPath" TextChanged="FolderOutputChangedCheck" HorizontalAlignment="Stretch" Margin="63,39,73,0" TextWrapping="NoWrap" VerticalAlignment="Top" MinWidth="10"/>
+                                    <Button Content="选择文件夹" x:Name="FolderChooseButton" Click="ChooseOneWallpaperFolder_Click" HorizontalAlignment="Right" Margin="0,9,0,0" VerticalAlignment="Top" Width="65"/>
+                                    <Button Content="输出路径" x:Name="FolderOutputPathButton" Click="ChooseOneWallpaperFolderOutputPath" HorizontalAlignment="Right" Margin="0,38,0,0" VerticalAlignment="Top" Width="65"/>
+
+                                    <Border BorderBrush="Black" BorderThickness="1" Margin="0,115,0,0">
+                                        <ScrollViewer VerticalScrollBarVisibility="Visible">
+                                            <StackPanel x:Name="SelectedFilesPanel"/>
+                                        </ScrollViewer>
+                                    </Border>
+                                    <Button 
+                                        x:Name="StartConvertButton" 
+                                        Grid.Row="3" 
+                                        Content="开始转换所有" 
+                                        Click="StartConvert_Click" 
+                                        VerticalAlignment="Top"
+                                        Margin="0,70,0,0"
+                                        Height="40"
+                                        FontWeight="Bold"/>
                                 </Grid>
                             </GroupBox>
-                            <ProgressBar HorizontalAlignment="Stretch" Height="20" Grid.Row="2" VerticalAlignment="Center" MinWidth="10" Margin="0,2,73,0"/>
-                            <Button Grid.Row="2" Content="🛑" HorizontalAlignment="Right" Height="20" Margin="0,0,6,0" Width="20" Background="#FFDDDDDD" VerticalAlignment="Bottom" Foreground="Red" ToolTipService.InitialShowDelay="200" ToolTipService.ShowDuration="60000" Cursor="Hand">
+                            <ProgressBar x:Name="ConversionProgressBar2" HorizontalAlignment="Stretch" Height="20" Grid.Row="2" VerticalAlignment="Center" MinWidth="10" Margin="0,2,68,0"/>
+
+                            <Button Click="BtnStop_Click" x:Name="BtnStop2" Grid.Row="2" Content="🛑" IsEnabled="False" HorizontalAlignment="Right" Height="20" Margin="0,0,1,0" Width="20" Background="#FFDDDDDD" VerticalAlignment="Bottom" Foreground="Red" ToolTipService.InitialShowDelay="200" ToolTipService.ShowDuration="60000" Cursor="Hand">
                                 <Button.ToolTip>
                                     <ToolTip>
                                         <StackPanel Width="220">
@@ -243,7 +271,7 @@
                                 </Button.ToolTip>
                             </Button>
 
-                            <Button Grid.Row="2" Content="⏸" HorizontalAlignment="Right" Height="20" Margin="0,0,28,0" Width="20" Background="#FFDDDDDD" VerticalAlignment="Bottom" Foreground="Blue" ToolTipService.InitialShowDelay="200" ToolTipService.ShowDuration="60000" Cursor="Hand">
+                            <Button Click="BtnPause_Click" x:Name="BtnPause2" Grid.Row="2" Content="⏸" IsEnabled="False" HorizontalAlignment="Right" Height="20" Margin="0,0,23,0" Width="20" Background="#FFDDDDDD" VerticalAlignment="Bottom" Foreground="Blue" ToolTipService.InitialShowDelay="200" ToolTipService.ShowDuration="60000" Cursor="Hand">
                                 <Button.ToolTip>
                                     <ToolTip>
                                         <StackPanel Width="220">
@@ -254,7 +282,7 @@
                                 </Button.ToolTip>
                             </Button>
 
-                            <Button Grid.Row="2" Content="▶" HorizontalAlignment="Right" Height="20" Margin="0,0,50,0" Width="20" Background="#FFDDDDDD" VerticalAlignment="Bottom" Foreground="Green" ToolTipService.InitialShowDelay="200" ToolTipService.ShowDuration="60000" Cursor="Hand">
+                            <Button Click="BtnResume_Click" x:Name="BtnResume2" Grid.Row="2" Content="▶" IsEnabled="False" HorizontalAlignment="Right" Height="20" Margin="0,0,45,0" Width="20" Background="#FFDDDDDD" VerticalAlignment="Bottom" Foreground="Green" ToolTipService.InitialShowDelay="200" ToolTipService.ShowDuration="60000" Cursor="Hand">
                                 <Button.ToolTip>
                                     <ToolTip>
                                         <StackPanel Width="220">
