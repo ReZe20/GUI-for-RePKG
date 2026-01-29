@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -37,6 +38,8 @@ namespace GUI_for_Repkg
         private static readonly SolidColorBrush NativeYellow = new SolidColorBrush(Color.FromRgb(255, 189, 0)); //暂停黄
         private static readonly SolidColorBrush NativeRed = new SolidColorBrush(Color.FromRgb(204, 0, 0));    //错误红
 
+        public event EventHandler ProcessFinished;
+
         public List<int> ThreadNumbers { get; set; } = new List<int>();
 
         public bool isMultiSelectMode = false;
@@ -49,10 +52,13 @@ namespace GUI_for_Repkg
 
         private HashSet<string> _pendingFiles = new HashSet<string>();
 
+        private CancellationTokenSource searchCts;
+
         public MainWindow()
         {
             InitializeComponent();
 
+            ReadGUIversion();
             ReadRePKGversion(repkgExePath);
             PopulateThreadCount();
             ReadWallpaperEngineAdress();
@@ -62,6 +68,14 @@ namespace GUI_for_Repkg
             this.SizeChanged += MainWindow_SizeChanged;
             ThumbnailScrollViewer.SizeChanged += (s, e) => UpdateThumbnailSize();
         }
+
+        private void ReadGUIversion()
+        {
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            GUIVersion.Text = $"{version.Major}.{version.Minor}.{version.Build}";
+            GUIdeveloper.Text = "ReZe20";
+        }
+
         private void ReadRePKGversion(string RePKGPath)
         {
             if (!System.IO.File.Exists(RePKGPath))
@@ -135,7 +149,7 @@ namespace GUI_for_Repkg
                     else DisableAllThumbnailShadows();
                 }
 
-                // 调用新的自适应图片大小方法
+                //调用新的自适应图片大小方法
                 UpdateThumbnailSize();
             }
         }
@@ -191,14 +205,14 @@ namespace GUI_for_Repkg
 
             if (isMultiSelectMode)
             {
-                // 多选模式下，点击图片区域 = 切换选中状态
+                //多选模式下，点击图片区域 = 切换选中状态
                 checkBox.IsChecked = !checkBox.IsChecked;
                 LoadDetail(folderPath);
                 UpdateSelectedCountDisplay();
             }
             else
             {
-                // 单选模式下：
+                //单选模式下：
                 //清除其他所有选中
                 foreach (Grid otherGrid in ThumbnailPanel.Children.OfType<Grid>())
                 {
@@ -467,19 +481,67 @@ namespace GUI_for_Repkg
                 SelectedCount.Text = $"已选中: {count}";
         }
 
-        private void UnenabledSettingCheckbox()
+        private void StartProcess_Click(object sender, RoutedEventArgs e)
         {
-            UseProjectNameForFile.IsEnabled = (!UseProjectNameForFile.IsEnabled);
-            JustSaveImages.IsEnabled = (!JustSaveImages.IsEnabled);
-            DontTransformTexFiles.IsEnabled = (!DontTransformTexFiles.IsEnabled);
-            PutAllFilesInOneDirectory.IsEnabled = (!PutAllFilesInOneDirectory.IsEnabled);
-            CoverAllFiles.IsEnabled = (!CoverAllFiles.IsEnabled);
-            CopyProjectJson.IsEnabled = (!CopyProjectJson.IsEnabled);
-            multithreading.IsEnabled = (!multithreading.IsEnabled);
-            cmbThreadCount.IsEnabled = (!cmbThreadCount.IsEnabled);
+            string outputPath = OutputPathBox.Text.Trim();
+
+            if (!Directory.Exists(outputPath))
+            {
+                try
+                {
+                    Directory.CreateDirectory(outputPath);
+                }
+                catch
+                {
+                    MessageBox.Show("无法创建输出目录，请检查权限或手动创建。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+            }
+
+            StartProcess(sender, e, outputPath);
         }
 
-        private async void StartProcess_Click(object sender, RoutedEventArgs e)
+        private void ImportIntoEditor_Click(object sender, RoutedEventArgs e)
+        {
+            string EditoroutputPath = TruncateToLastChar(WallpapersFile.Text, "\\workshop\\content\\431960") + "\\common\\wallpaper_engine\\projects\\myprojects";
+
+            bool a = false;
+            bool b = false;
+            if (UseProjectNameForFile.IsChecked == false)
+            {
+                UseProjectNameForFile.IsChecked = true;
+                a = true;
+            }
+            if (CopyProjectJson.IsChecked == false)
+            {
+                CopyProjectJson.IsChecked = true;
+                b = true;
+            }
+
+            if (!Directory.Exists(EditoroutputPath))
+            {
+                MessageBox.Show("未找到目录，请检查！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            StartProcess(sender, e, EditoroutputPath);
+
+            this.ProcessFinished += (s, args) => 
+            {
+                if (a)
+                {
+                    UseProjectNameForFile.IsChecked = false;
+                    a = false;
+                }
+                if (b)
+                {
+                    CopyProjectJson.IsChecked = false;
+                    b = false;
+                }
+            };
+        }
+
+        private async void StartProcess(object sender, RoutedEventArgs e, string outputPath)
         {
             UpdateProgressState("Normal");
 
@@ -503,28 +565,13 @@ namespace GUI_for_Repkg
                 MessageBox.Show("请选择一个场景壁纸！", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
-
-            string outputPath = OutputPathBox.Text.Trim();
-
-            if (!Directory.Exists(outputPath))
-            {
-                try
-                {
-                    Directory.CreateDirectory(outputPath);
-                }
-                catch
-                {
-                    MessageBox.Show("无法创建输出目录，请检查权限或手动创建。","错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-            }
             
             _cts = new CancellationTokenSource();
             _pauseEvent = new ManualResetEventSlim(true); // true 表示初始状态为“运行中”（非暂停）
             _isPaused = false;
 
             ToggleControlButtons(true);
-            UnenabledSettingCheckbox();
+            UnenabledStartButtonAndSettingCheckbox();
 
             int threadCount = multithreading.IsChecked == true ? (int)cmbThreadCount.SelectedItem : 1;
 
@@ -563,12 +610,13 @@ namespace GUI_for_Repkg
                 MessageBox.Show($"处理过程中发生错误：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 SituationPresentation.Text = "处理失败";
                 UpdateProgressState("Error");
-                UnenabledSettingCheckbox();
+                UnenabledStartButtonAndSettingCheckbox();
             }
             finally
             {
-                UnenabledSettingCheckbox();
+                UnenabledStartButtonAndSettingCheckbox();
                 ToggleControlButtons(false);
+                ProcessFinished?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -742,7 +790,7 @@ namespace GUI_for_Repkg
                         OutputPathBox.Text = dialog.FolderName;
                     }
                 }
-                else break;//点击取消便退出循环
+                else break;
             }
         }
 
@@ -805,7 +853,7 @@ namespace GUI_for_Repkg
                 }
             }
 
-            //获取选中的【标签】
+            //获取选中的标签
             var checkedTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             if (TagsListPanel != null)
             {
@@ -958,7 +1006,6 @@ namespace GUI_for_Repkg
                 Tag = filePath
             };
 
-
             DockPanel dock = new DockPanel { LastChildFill = true };
 
             Button btnDelete = new Button
@@ -1055,87 +1102,6 @@ namespace GUI_for_Repkg
                     }
                 }
                 else return;
-            }
-        }
-
-        private async void OneWallpaperOutput_Click(object sender, RoutedEventArgs e)
-        {
-            UpdateProgressState("Normal");
-
-            IEnumerable<string> selectedItems = Enumerable.Empty<string>();
-            List<string> folderList = selectedItems.ToList();
-            folderList.Add(OneWallpaperFile.Text);
-            selectedItems = folderList;
-
-            if (!File.Exists(repkgExePath))
-            {
-                MessageBox.Show($"找不到{repkgExePath}，请检查路径是否正确", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            string outputPath = OneOutputPath.Text;
-
-            if (!Directory.Exists(outputPath))
-            {
-                try
-                {
-                    Directory.CreateDirectory(outputPath);
-                }
-                catch
-                {
-                    MessageBox.Show("无法创建输出目录，请检查权限或手动创建。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-            }
-
-            _cts = new CancellationTokenSource();
-            _pauseEvent = new ManualResetEventSlim(true); // true 表示初始状态为“运行中”（非暂停）
-            _isPaused = false;
-
-            ToggleControlButtons(true);
-            UnenabledSettingCheckbox();
-
-            int threadCount = multithreading.IsChecked == true ? (int)cmbThreadCount.SelectedItem : 1;
-
-            var progressReport = new Progress<ProcessProgressReport>(report =>
-            {
-                //Progress<T>会自动在UI线程上调用，这里不需要再Dispatcher.Invoke
-                SituationPresentation.Text = report.Message;
-                ConversionProgressBar1.Value = report.Percentage;
-                ConversionProgressBar2.Value = report.Percentage;
-                TaskBarProgress.ProgressValue = report.Percentage / 100;
-                SelectedCount.Text = $"已完成: {report.CompletedCount}/{report.TotalCount}";
-            });
-
-            try
-            {
-                await ProcessLauncher.LaunchAsync(
-                    selectedItems,
-                    repkgExePath,
-                    outputPath,
-                    threadCount,
-                    false,
-                    _cts.Token,
-                    _pauseEvent,
-                    progressReport);
-
-                MessageBox.Show("所有壁纸处理完成！", "完成", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (OperationCanceledException)
-            {
-                SituationPresentation.Text = "提取已停止";
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"处理过程中发生错误：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                SituationPresentation.Text = "处理失败";
-                UpdateProgressState("Error");
-                UnenabledSettingCheckbox();
-            }
-            finally
-            {
-                UnenabledSettingCheckbox();
-                ToggleControlButtons(false);
             }
         }
 
@@ -1251,7 +1217,7 @@ namespace GUI_for_Repkg
 
         private void FolderOutputChangedCheck(object sender, TextChangedEventArgs e)
         {
-            if (OneOutputPath.Text != "")
+            if (MultipleWallpaperFilesOutputPath.Text != "")
             {
                 TurnOffWallpaperFile();
             }
@@ -1269,16 +1235,19 @@ namespace GUI_for_Repkg
 
         private async void StartConvert_Click(object sender, RoutedEventArgs e)
         {
-            if (_pendingFiles.Count == 0) return;
-
+            if (_pendingFiles.Count == 0)
+            {
+                MessageBox.Show($"队列中没有任务！", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
             if (!File.Exists(repkgExePath))
             {
-                MessageBox.Show($"找不到 {repkgExePath}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"找不到{repkgExePath}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             string outputPath = "";
-            if (OneOutputPath.Text != "" && MultipleWallpaperFilesOutputPath.Text != "")
+            if (OneOutputPath.Text == "" && MultipleWallpaperFilesOutputPath.Text == "")
             {
                 MessageBox.Show($"没有输出目录！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -1288,7 +1257,7 @@ namespace GUI_for_Repkg
                 outputPath = OneOutputPath.Text != "" ? OneOutputPath.Text : MultipleWallpaperFilesOutputPath.Text;
             }
 
-            StartConvertButton.IsEnabled = false;
+            UnenabledStartButtonAndSettingCheckbox();
             UpdateProgressState("Normal");
 
             _cts = new CancellationTokenSource();
@@ -1299,7 +1268,7 @@ namespace GUI_for_Repkg
             {
                 SituationPresentation.Text = report.Message;
                 ConversionProgressBar1.Value = report.Percentage;
-                ConversionProgressBar2.Value = report.Percentage; // 假设你有两个进度条
+                ConversionProgressBar2.Value = report.Percentage;
                 SelectedCount.Text = $"正在处理: {report.CompletedCount}/{report.TotalCount}";
             });
 
@@ -1323,19 +1292,26 @@ namespace GUI_for_Repkg
             {
                 SituationPresentation.Text = "任务已被用户停止";
                 UpdateProgressState("Error");
+                UnenabledStartButtonAndSettingCheckbox();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"处理过程中出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 UpdateProgressState("Error");
+                UnenabledStartButtonAndSettingCheckbox();
             }
             finally
             {
-                // 7. 恢复 UI 状态
-                StartConvertButton.IsEnabled = true;
+                UnenabledStartButtonAndSettingCheckbox();
                 ConversionProgressBar1.Value = 0;
                 ConversionProgressBar2.Value = 0;
             }
+        }
+
+        private void Cleanqueue_Click(object sender, RoutedEventArgs e)
+        {
+            SelectedFilesPanel.Children.Clear();
+            _pendingFiles.Clear();
         }
 
         private void TurnOffWallpaperFile()
@@ -1345,7 +1321,6 @@ namespace GUI_for_Repkg
             OneWallpaperChooseButton.IsEnabled = false;
             OneWallpaperOutPathButton.IsEnabled = false;
         }
-
         private void TurnOnWallpaperFile()
         {
             OneWallpaperFile.IsEnabled = true;
@@ -1360,13 +1335,45 @@ namespace GUI_for_Repkg
             FolderChooseButton.IsEnabled = false;
             FolderOutputPathButton.IsEnabled = false;
         }
-
         private void TurnOnWallpaperFolder()
         {
             MultipleWallpaperFiles.IsEnabled = true;
             MultipleWallpaperFilesOutputPath.IsEnabled = true;
             FolderChooseButton.IsEnabled = true;
             FolderOutputPathButton.IsEnabled = true;
+        }
+
+        private void UnenabledStartButtonAndSettingCheckbox()
+        {
+            UseProjectNameForFile.IsEnabled = (!UseProjectNameForFile.IsEnabled);
+            JustSaveImages.IsEnabled = (!JustSaveImages.IsEnabled);
+            DontTransformTexFiles.IsEnabled = (!DontTransformTexFiles.IsEnabled);
+            PutAllFilesInOneDirectory.IsEnabled = (!PutAllFilesInOneDirectory.IsEnabled);
+            CoverAllFiles.IsEnabled = (!CoverAllFiles.IsEnabled);
+            CopyProjectJson.IsEnabled = (!CopyProjectJson.IsEnabled);
+            multithreading.IsEnabled = (!multithreading.IsEnabled);
+            cmbThreadCount.IsEnabled = (!cmbThreadCount.IsEnabled);
+            StartProcessButton.IsEnabled = (!StartProcessButton.IsEnabled);
+            StartConvertButton.IsEnabled = (!StartConvertButton.IsEnabled);
+            ImportIntoEditor.IsEnabled = (!ImportIntoEditor.IsEnabled);
+        }
+
+        private async void WallpapersFilePathChanged(object sender, TextChangedEventArgs e)
+        {
+            searchCts?.Cancel();
+            searchCts = new CancellationTokenSource();
+
+            try
+            {
+                await Task.Delay(500, searchCts.Token);
+
+                string currentText = ((TextBox)sender).Text;
+                if (!string.IsNullOrWhiteSpace(currentText))
+                {
+                    LoadThumbnailsAutomatically();
+                }
+            }
+            catch { }
         }
 
         private void RestoreDefaultWallpapersPath_Click(object sender, RoutedEventArgs e)
@@ -1435,6 +1442,56 @@ namespace GUI_for_Repkg
             if (stateChanged)
             {
                 ApplyFilters();
+            }
+        }
+
+        private void GUIGitHubButton_Click(object sender, RoutedEventArgs e)
+        {
+            string url = "https://github.com/ReZe20/GUI-for-RePKG";
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("打开链接出现错误","错误",MessageBoxButton.OK,MessageBoxImage.Error);
+            }
+        }
+        private void GUIBilibiliButton_Click(object sender, RoutedEventArgs e)
+        {
+            string url = "https://space.bilibili.com/504365497";
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("打开链接出现错误", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void RePKGGitHubButton_Click(object sender, RoutedEventArgs e)
+        {
+            string url = "https://github.com/notscuffed/repkg";
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("打开链接出现错误", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

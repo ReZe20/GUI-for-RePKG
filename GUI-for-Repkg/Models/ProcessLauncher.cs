@@ -68,7 +68,7 @@ namespace GUI_for_Repkg.Models
 
             //判断是否用壁纸名做文件夹名
             bool useProjectName = mainWindow?.UseProjectNameForFile.IsChecked == true;
-            //只保留图像
+            //只转换Tex
             string justSaveImages = mainWindow?.JustSaveImages.IsChecked == true ? "-e Tex" : "";
             //不转换Tex文件
             string dontTransfornTexFiles = mainWindow?.DontTransformTexFiles.IsChecked == true ? " --no-tex-convert" : "";
@@ -103,22 +103,24 @@ namespace GUI_for_Repkg.Models
 
                     try
                     {
-                        string workshopId = Path.GetFileName(folder);
+                        string workshopId = wallpaperengineOutputMode == false ? Path.GetFileNameWithoutExtension(folder) : Path.GetFileName(folder);
                         string rawTitle = "未命名";
-
-                        //安全读取project.json的title（带异常保护）
-                        string jsonPath = Path.Combine(folder, "project.json");
-                        if (File.Exists(jsonPath))
+                        if (wallpaperengineOutputMode)
                         {
-                            try
+                            //安全读取project.json的title（带异常保护）
+                            string jsonPath = Path.Combine(folder, "project.json");
+                            if (File.Exists(jsonPath))
                             {
-                                var json = JObject.Parse(File.ReadAllText(jsonPath));
-                                rawTitle = json["title"]?.ToString()?.Trim() ?? "未命名";
-                            }
-                            catch
-                            {
-                                // JSON 损坏或解析失败时回退
-                                rawTitle = "未命名";
+                                try
+                                {
+                                    var json = JObject.Parse(File.ReadAllText(jsonPath));
+                                    rawTitle = json["title"]?.ToString()?.Trim() ?? "未命名";
+                                }
+                                catch
+                                {
+                                    //JSON损坏或解析失败时回退
+                                    rawTitle = "未命名";
+                                }
                             }
                         }
 
@@ -177,7 +179,7 @@ namespace GUI_for_Repkg.Models
                                 catch (Exception ex)
                                 {
                                     System.Diagnostics.Debug.WriteLine($"重命名失败 ({rawTitle} → {candidateName}): {ex.Message}");
-                                    // 重命名失败时保持原 ID 文件夹，不影响后续处理
+                                    //重命名失败时保持原ID文件夹，不影响后续处理
                                     finalFolderName = workshopId;
                                 }
                             }
@@ -199,14 +201,12 @@ namespace GUI_for_Repkg.Models
                     catch (AggregateException ae)
                     {
                         //检查里面是否包含“取消异常”
-                        //Flatten() 会把嵌套的异常摊平
+                        //Flatten()会把嵌套的异常摊平
                         ae.Handle(ex =>
                         {
                             return ex is OperationCanceledException; // 如果是取消异常，视为“已处理”
                         });
 
-                        //如果全是取消异常，Handle 会处理掉；如果有其他错误，Handle 会重新抛出
-                        //手动抛出一个干净的 OperationCanceledException 给 MainWindow 捕获
                         throw new OperationCanceledException();
                     }
                     catch (OperationCanceledException)
