@@ -1,21 +1,15 @@
 ﻿using GUI_for_Repkg.Models;
 using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using System.Windows.Shell;
 using System.Windows.Threading;
 using static GUI_for_Repkg.Models.ProcessLauncher;
@@ -34,9 +28,9 @@ namespace GUI_for_Repkg
         string repkgExePath = @"RePKG.exe";
         private List<ThumbnailInfo> allThumbnails = new List<ThumbnailInfo>();
 
-        private static readonly SolidColorBrush NativeGreen = new SolidColorBrush(Color.FromRgb(6, 176, 37));  //正常绿
-        private static readonly SolidColorBrush NativeYellow = new SolidColorBrush(Color.FromRgb(255, 189, 0)); //暂停黄
-        private static readonly SolidColorBrush NativeRed = new SolidColorBrush(Color.FromRgb(204, 0, 0));    //错误红
+        private static readonly SolidColorBrush NativeGreen = new SolidColorBrush(Color.FromRgb(6, 176, 37));  //绿
+        private static readonly SolidColorBrush NativeYellow = new SolidColorBrush(Color.FromRgb(255, 189, 0)); //黄
+        private static readonly SolidColorBrush NativeRed = new SolidColorBrush(Color.FromRgb(204, 0, 0));    //红
 
         public event EventHandler ProcessFinished;
 
@@ -51,8 +45,6 @@ namespace GUI_for_Repkg
         private bool _isPaused = false;
 
         private HashSet<string> _pendingFiles = new HashSet<string>();
-
-        private CancellationTokenSource searchCts;
 
         public MainWindow()
         {
@@ -87,6 +79,71 @@ namespace GUI_for_Repkg
             {
                 RePKGVersion.Text = FileVersionInfo.GetVersionInfo(RePKGPath).ProductVersion;
                 RePKGdeveloper.Text = "notscuffed";
+            }
+        }
+
+        private void PopulateThreadCount()
+        {
+            int logicalCores = Environment.ProcessorCount;
+
+            if (logicalCores > 1)
+            {
+                multithreading.IsChecked = true;
+
+                int max = Math.Max(logicalCores, 2);
+                ThreadNumbers = Enumerable.Range(2, max - 1).ToList();
+
+                cmbThreadCount.ItemsSource = ThreadNumbers;
+                cmbThreadCount.SelectedItem = max;
+            }
+            else
+            {
+                multithreading.IsChecked = false;
+                multithreading.IsEnabled = false;
+                cmbThreadCount.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void ReadWallpaperEngineAdress()
+        {
+            try
+            {
+                using (RegistryKey rootKey = Registry.CurrentUser)
+                {
+                    string[] possibleSubKeys = { @"Software\WallpaperEngine", @"Software\Wallpaper Engine" };
+
+                    foreach (var subKey in possibleSubKeys)
+                    {
+                        using (RegistryKey weKey = rootKey.OpenSubKey(subKey))
+                        {
+                            if (weKey == null) continue;
+
+                            object installPath = weKey.GetValue("installPath");
+                            if (installPath != null)
+                            {
+                                WallpapersFile.Text = TruncateToLastChar((string)installPath, "\\common\\wallpaper_engine\\wallpaper64.exe")
+                                                      + "\\workshop\\content\\431960";
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"ReadWallpaperEngineUserSettings error: {ex}");
+            }
+        }
+
+        private void DefaultOutputPathSetting()
+        {
+            try
+            {
+                OutputPathBox.Text = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "GUI-for-Repkg_Output");
+            }
+            catch
+            {
+                OutputPathBox.Text = "";
             }
         }
 
@@ -140,7 +197,6 @@ namespace GUI_for_Repkg
         {
             if (e.WidthChanged)
             {
-                // 处理阴影逻辑保持不变
                 bool shouldEnableShadow = this.ActualWidth < ShadowDisableThreshold;
                 if (shouldEnableShadow != _isShadowEnabled)
                 {
@@ -192,7 +248,7 @@ namespace GUI_for_Repkg
                 var parent = originalSource;
                 while (parent != null && parent != grid)
                 {
-                    if (parent is CheckBox) return; //如果点的是复选框，直接退出，交给 ThumbnailCheckBox_Click
+                    if (parent is CheckBox) return;
                     parent = VisualTreeHelper.GetParent(parent);
                 }
             }
@@ -205,25 +261,21 @@ namespace GUI_for_Repkg
 
             if (isMultiSelectMode)
             {
-                //多选模式下，点击图片区域 = 切换选中状态
                 checkBox.IsChecked = !checkBox.IsChecked;
                 LoadDetail(folderPath);
                 UpdateSelectedCountDisplay();
             }
             else
             {
-                //单选模式下：
-                //清除其他所有选中
+
                 foreach (Grid otherGrid in ThumbnailPanel.Children.OfType<Grid>())
                 {
                     var otherCb = otherGrid.Children.OfType<CheckBox>().FirstOrDefault();
                     if (otherCb != null && otherGrid != grid)
                     {
                         otherCb.IsChecked = false;
-                        // 同时隐藏未选中的复选框（因为鼠标不在那些上面）
                         otherCb.Visibility = Visibility.Collapsed;
 
-                        // 清除边框高亮
                         var otherBorder = otherGrid.Children.OfType<Border>().FirstOrDefault();
                         if (otherBorder != null)
                         {
@@ -303,10 +355,10 @@ namespace GUI_for_Repkg
                         ThumbnailCheckBox_Click);
 
                     _isShadowEnabled = this.ActualWidth < ShadowDisableThreshold;
-            if (_isShadowEnabled)
-                EnableAllThumbnailShadows();
-            else
-                DisableAllThumbnailShadows();
+                    if (_isShadowEnabled)
+                        EnableAllThumbnailShadows();
+                    else
+                        DisableAllThumbnailShadows();
                     int count = thumbnails.Count;
                     SituationPresentation.Text = count == 0 ? "未找到壁纸，请重新设置壁纸路径" : $"已找到 {count} 个场景壁纸";
                 });
@@ -478,7 +530,7 @@ namespace GUI_for_Repkg
             {
                 SelectedCount.Visibility = Visibility.Collapsed;
             }
-                SelectedCount.Text = $"已选中: {count}";
+            SelectedCount.Text = $"已选中: {count}";
         }
 
         private void StartProcess_Click(object sender, RoutedEventArgs e)
@@ -497,7 +549,6 @@ namespace GUI_for_Repkg
                     return;
                 }
             }
-
             StartProcess(sender, e, outputPath);
         }
 
@@ -526,7 +577,7 @@ namespace GUI_for_Repkg
 
             StartProcess(sender, e, EditoroutputPath);
 
-            this.ProcessFinished += (s, args) => 
+            this.ProcessFinished += (s, args) =>
             {
                 if (a)
                 {
@@ -565,7 +616,7 @@ namespace GUI_for_Repkg
                 MessageBox.Show("请选择一个场景壁纸！", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
-            
+
             _cts = new CancellationTokenSource();
             _pauseEvent = new ManualResetEventSlim(true); // true 表示初始状态为“运行中”（非暂停）
             _isPaused = false;
@@ -690,28 +741,6 @@ namespace GUI_for_Repkg
             BtnResume2.IsEnabled = false;
         }
 
-        private void PopulateThreadCount()
-        {
-            int logicalCores = Environment.ProcessorCount;
-
-            if (logicalCores > 1)
-            {
-                multithreading.IsChecked = true;
-
-                int max = Math.Max(logicalCores, 2);
-                ThreadNumbers = Enumerable.Range(2, max - 1).ToList();
-
-                cmbThreadCount.ItemsSource = ThreadNumbers;
-                cmbThreadCount.SelectedItem = max;
-            }
-            else
-            {
-                multithreading.IsChecked = false;
-                multithreading.IsEnabled = false;
-                cmbThreadCount.Visibility = Visibility.Collapsed;
-            }
-        }
-
         private static string TruncateToLastChar(string inputStr, string suffixToRemove)
         {
             if (string.IsNullOrEmpty(inputStr) || string.IsNullOrEmpty(suffixToRemove))
@@ -721,49 +750,6 @@ namespace GUI_for_Repkg
                 return inputStr.Substring(0, inputStr.Length - suffixToRemove.Length);
 
             return inputStr;
-        }
-
-        private void ReadWallpaperEngineAdress()
-        {
-            try
-            {
-                using (RegistryKey rootKey = Registry.CurrentUser)
-                {
-                    string[] possibleSubKeys = { @"Software\WallpaperEngine", @"Software\Wallpaper Engine" };
-
-                    foreach (var subKey in possibleSubKeys)
-                    {
-                        using (RegistryKey weKey = rootKey.OpenSubKey(subKey))
-                        {
-                            if (weKey == null) continue;
-
-                            object installPath = weKey.GetValue("installPath");
-                            if (installPath != null)
-                            {
-                                WallpapersFile.Text = TruncateToLastChar((string)installPath, "\\common\\wallpaper_engine\\wallpaper64.exe")
-                                                      + "\\workshop\\content\\431960";
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"ReadWallpaperEngineUserSettings error: {ex}");
-            }
-        }
-
-        private void DefaultOutputPathSetting()
-        {
-            try
-            {
-                OutputPathBox.Text = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "GUI-for-Repkg_Output");
-            }
-            catch
-            {
-                OutputPathBox.Text = "";
-            }
         }
 
         private void SettleOutputPathBox(object sender, RoutedEventArgs e)
@@ -1022,7 +1008,7 @@ namespace GUI_for_Repkg
             };
             DockPanel.SetDock(btnDelete, Dock.Right);
 
-            btnDelete.Click += (s, e) => 
+            btnDelete.Click += (s, e) =>
             {
                 _pendingFiles.Remove(filePath);
                 SelectedFilesPanel.Children.Remove(itemBorder);
@@ -1114,7 +1100,7 @@ namespace GUI_for_Repkg
 
                 if (droppedPath.Contains(" "))
                 {
-                    MessageBox.Show("根路径不能含空格"); 
+                    MessageBox.Show("根路径不能含空格");
                     return;
                 }
 
@@ -1272,7 +1258,7 @@ namespace GUI_for_Repkg
                 SelectedCount.Text = $"正在处理: {report.CompletedCount}/{report.TotalCount}";
             });
 
-            try 
+            try
             {
                 int threadCount = multithreading.IsChecked == true ? (int)cmbThreadCount.SelectedItem : 1;
 
@@ -1358,68 +1344,43 @@ namespace GUI_for_Repkg
             ImportIntoEditor.IsEnabled = (!ImportIntoEditor.IsEnabled);
         }
 
-        private async void WallpapersFilePathChanged(object sender, TextChangedEventArgs e)
+        private void WallpapersFilePathChanged(object sender, TextChangedEventArgs e)
         {
-            searchCts?.Cancel();
-            searchCts = new CancellationTokenSource();
-
-            try
+            string currentText = ((TextBox)sender).Text;
+            if (!string.IsNullOrWhiteSpace(currentText))
             {
-                await Task.Delay(500, searchCts.Token);
-
-                string currentText = ((TextBox)sender).Text;
-                if (!string.IsNullOrWhiteSpace(currentText))
-                {
-                    LoadThumbnailsAutomatically();
-                }
+                LoadThumbnailsAutomatically();
             }
-            catch { }
         }
 
         private void RestoreDefaultWallpapersPath_Click(object sender, RoutedEventArgs e)
         {
             ReadWallpaperEngineAdress();
         }
-
         private void Unenable_Left_Column_Click(object sender, RoutedEventArgs e)
         {
             LeftColumn.Width = new GridLength(0);
             EnableLeftColumnButton.Visibility = Visibility.Visible;
             OutputPathBox.Margin = new Thickness(42, 8, 120, 0);
         }
-
         private void Enable_Left_Column_Click(object sender, RoutedEventArgs e)
         {
             EnableLeftColumnButton.Visibility = Visibility.Collapsed;
             LeftColumn.Width = new GridLength(145);
             OutputPathBox.Margin = new Thickness(0, 8, 120, 0);
         }
-
         private void Multithreading_Checked(object sender, RoutedEventArgs e)
         {
             cmbThreadCount.IsEnabled = true;
         }
-
         private void Multithreading_Unchecked(object sender, RoutedEventArgs e)
         {
             cmbThreadCount.IsEnabled = false;
         }
-
-        private void GUIupdateDefault(object sender, RoutedEventArgs e)
-        {
-            GUIupdateAdress.Text = "123";
-        }
-
-        private void RepkgupdateDefault(object sender, RoutedEventArgs e)
-        {
-            RepkgupdateAdress.Text = "123";
-        }
-
         private void SelectAllButton_Click(object sender, RoutedEventArgs e)
         {
             SetAllTagsChecked(true);
         }
-
         private void SelectNoneButton_Click(object sender, RoutedEventArgs e)
         {
             SetAllTagsChecked(false);
@@ -1458,7 +1419,7 @@ namespace GUI_for_Repkg
             }
             catch (Exception ex)
             {
-                MessageBox.Show("打开链接出现错误","错误",MessageBoxButton.OK,MessageBoxImage.Error);
+                MessageBox.Show("打开链接出现错误", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         private void GUIBilibiliButton_Click(object sender, RoutedEventArgs e)
@@ -1493,27 +1454,6 @@ namespace GUI_for_Repkg
             {
                 MessageBox.Show("打开链接出现错误", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
-
-        private void CheckBox_Checked(object sender, RoutedEventArgs e) { }
-        private void CheckBox_Checked_1(object sender, RoutedEventArgs e) { }
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e) { }
-        private void TextBox_TextChanged_1(object sender, TextChangedEventArgs e) { }
-        private void Button_Click(object sender, RoutedEventArgs e) { }
-        private void Button_Click_1(object sender, RoutedEventArgs e) { }
-        private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e) { }
-        private void TabControl_SelectionChanged_1(object sender, SelectionChangedEventArgs e) { }
-        private void TabControl_SelectionChanged_2(object sender, SelectionChangedEventArgs e) { }
-        private void TabControl_SelectionChanged_3(object sender, SelectionChangedEventArgs e) { }
-        private void Button_Click_2(object sender, RoutedEventArgs e) { }
-        private void Button_Click_3(object sender, RoutedEventArgs e) { }
-        private void Button_Click_4(object sender, RoutedEventArgs e) { }
-        private void Button_Click_5(object sender, RoutedEventArgs e) { }
-        private void SingleChoice_Click(object sender, RoutedEventArgs e) { }
-
-        private void WallpaperSearchBox_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-
         }
     }
 }

@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GUI_for_Repkg"
-        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" x:Class="GUI_for_Repkg.MainWindow"
+        x:Class="GUI_for_Repkg.MainWindow"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d" 
         Title="GUI for RePKG" Height="850" Width="950" MinWidth="650" MinHeight="740">
@@ -49,10 +49,10 @@
             </Setter>
         </Style>
     </Window.Resources>
-    <TabControl SelectionChanged="TabControl_SelectionChanged">
+    <TabControl>
         <TabItem Header="壁纸转换">
             <Grid>
-                <TabControl Grid.RowSpan="2" Grid.ColumnSpan="4" SelectionChanged="TabControl_SelectionChanged_3">
+                <TabControl Grid.RowSpan="2" Grid.ColumnSpan="4">
                     <TabItem Header="已有壁纸">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -206,7 +206,7 @@
                                     <ToolTip>
                                         <StackPanel Width="220">
                                             <TextBlock Text="停止" TextWrapping="Wrap" />
-                                            <TextBlock Text="只有在暂停时才能停止" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
+                                            <TextBlock Text="将在所有实例完成当前转换后中断任务。" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
                                         </StackPanel>
                                     </ToolTip>
                                 </Button.ToolTip>
@@ -217,7 +217,7 @@
                                     <ToolTip>
                                         <StackPanel Width="220">
                                             <TextBlock Text="暂停" TextWrapping="Wrap" />
-                                            <TextBlock Text="单击暂停将在当前转换任务完成后暂停；双击暂停将迅速暂停转换，转换至一半的壁纸在开始时需要重新转换。具体暂停细节受到多线程支持影响。" TextWrapping="Wrap" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
+                                            <TextBlock Text="单击暂停将在当前所有实例转换任务完成后暂停。" TextWrapping="Wrap" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
                                         </StackPanel>
                                     </ToolTip>
                                 </Button.ToolTip>
@@ -307,7 +307,7 @@
                                     <ToolTip>
                                         <StackPanel Width="220">
                                             <TextBlock Text="停止" TextWrapping="Wrap" />
-                                            <TextBlock Text="只有在暂停时才能停止" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
+                                            <TextBlock Text="将在所有实例完成当前转换后中断任务。" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
                                         </StackPanel>
                                     </ToolTip>
                                 </Button.ToolTip>
@@ -318,7 +318,7 @@
                                     <ToolTip>
                                         <StackPanel Width="220">
                                             <TextBlock Text="暂停" TextWrapping="Wrap" />
-                                            <TextBlock Text="单击暂停将在当前转换任务完成后暂停；双击暂停将迅速暂停转换，转换至一半的壁纸在开始时需要重新转换。具体暂停细节受到多线程支持影响。" TextWrapping="Wrap" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
+                                            <TextBlock Text="单击暂停将在当前所有实例转换任务完成后暂停。" TextWrapping="Wrap" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
                                         </StackPanel>
                                     </ToolTip>
                                 </Button.ToolTip>
@@ -462,17 +462,6 @@
                         <TextBlock Text="已有壁纸路径" Margin="15,45,0,0"/>
                         <TextBox x:Name="WallpapersFile" TextChanged="WallpapersFilePathChanged" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="15,65,80,0"/>
                         <Button Content="恢复默认" HorizontalAlignment="Right" Margin="0,65,15,0" VerticalAlignment="Top" Width="60"  Click="RestoreDefaultWallpapersPath_Click"/>
-                    </Grid>
-
-                </GroupBox>
-                <GroupBox Grid.Row="2" Header="更新设置">
-                    <Grid>
-                        <TextBlock Text="GUI for Repkg更新地址：" VerticalAlignment="Top" Margin="15,18,0,0"/>
-                        <TextBox x:Name="GUIupdateAdress" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="15,35,80,0"/>
-                        <TextBlock Text="Repkg更新地址：" VerticalAlignment="Top" Margin="15,60,0,0"/>
-                        <TextBox x:Name="RepkgupdateAdress" Text="" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="15,78,80,0"/>
-                        <Button Click="GUIupdateDefault" Content="恢复默认" HorizontalAlignment="Right" Margin="0,33,15,0" VerticalAlignment="Top" Width="60"/>
-                        <Button Click="RepkgupdateDefault" Content="恢复默认" HorizontalAlignment="Right" Margin="0,75,15,0" VerticalAlignment="Top" Width="60"/>
                     </Grid>
                 </GroupBox>
             </Grid>

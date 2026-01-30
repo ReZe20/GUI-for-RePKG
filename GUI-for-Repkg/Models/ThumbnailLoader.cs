@@ -2,10 +2,7 @@
 using Newtonsoft.Json.Linq;
 using SkiaSharp;
 using SkiaSharp.Views.WPF;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -13,7 +10,6 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
-using System.Windows.Media.Media3D;
 
 namespace GUI_for_Repkg.Models
 {
@@ -77,7 +73,7 @@ namespace GUI_for_Repkg.Models
                         }
                     }
 
-                    results.Add(new ThumbnailInfo( current, title, previewFullPath, rating, tagsList));
+                    results.Add(new ThumbnailInfo(current, title, previewFullPath, rating, tagsList));
                 }
                 catch (Exception ex)
                 {
@@ -100,13 +96,13 @@ namespace GUI_for_Repkg.Models
             Panel targetPanel,
             bool isMultiSelectMode,
             MouseButtonEventHandler gridHandler,
-            RoutedEventHandler checkBoxClickHandler) 
+            RoutedEventHandler checkBoxClickHandler)
         {
             targetPanel.Children.Clear();
 
-            const int thumbnailSize =  300;
+            const int thumbnailSize = 300;
             const double normalScale = 1.0;
-            const double hoverScale = 170 / 150.0; 
+            const double hoverScale = 170 / 150.0;
 
             //图片动画
             var enlargeAnimation = new DoubleAnimation
@@ -203,7 +199,7 @@ namespace GUI_for_Repkg.Models
                     Height = 45,
                     Background = new SolidColorBrush(Color.FromArgb(128, 0, 0, 0)),
                     VerticalAlignment = VerticalAlignment.Bottom,
-                    HorizontalAlignment = HorizontalAlignment.Stretch,  
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
                     Opacity = 1,
                     RenderTransformOrigin = new Point(0.5, 0.5),
                     Child = titleTextBlock,
@@ -274,7 +270,7 @@ namespace GUI_for_Repkg.Models
                     Panel.SetZIndex(grid, 0);
                     var mainWindow = Application.Current.MainWindow as MainWindow;
                     bool isGlobalMultiMode = mainWindow != null && mainWindow.isMultiSelectMode;
-                    if(checkBox.IsChecked == false && !isGlobalMultiMode)
+                    if (checkBox.IsChecked == false && !isGlobalMultiMode)
                     {
                         checkBox.Visibility = Visibility.Collapsed;
                     }
@@ -283,49 +279,49 @@ namespace GUI_for_Repkg.Models
                 grid.PreviewMouseLeftButtonDown += gridHandler;
                 targetPanel.Children.Add(grid);
 
-        _ = Task.Run(async () =>
-                {
-                    await _loadSemaphore.WaitAsync();
-                    try
-                    {
-                        WriteableBitmap realBitmap = null;
-                        try
+                _ = Task.Run(async () =>
                         {
-                            using var originalBitmap = SKBitmap.Decode(info.PreviewImageFullPath);
-                            if (originalBitmap != null)
+                            await _loadSemaphore.WaitAsync();
+                            try
                             {
-                                var targetInfo = new SKImageInfo(thumbnailSize, thumbnailSize);
-                                using var targetBitmap = new SKBitmap(targetInfo);
+                                WriteableBitmap realBitmap = null;
+                                try
+                                {
+                                    using var originalBitmap = SKBitmap.Decode(info.PreviewImageFullPath);
+                                    if (originalBitmap != null)
+                                    {
+                                        var targetInfo = new SKImageInfo(thumbnailSize, thumbnailSize);
+                                        using var targetBitmap = new SKBitmap(targetInfo);
 
-                                var sampling = new SKSamplingOptions(SKCubicResampler.CatmullRom);
+                                        var sampling = new SKSamplingOptions(SKCubicResampler.CatmullRom);
 
-                                // 如果 Resize 失败，回退到原图
-                                bool success = originalBitmap.ScalePixels(targetBitmap, sampling);
-                                originalBitmap.ScalePixels(targetBitmap, sampling);
+                                        // 如果 Resize 失败，回退到原图
+                                        bool success = originalBitmap.ScalePixels(targetBitmap, sampling);
+                                        originalBitmap.ScalePixels(targetBitmap, sampling);
 
-                                realBitmap = targetBitmap.ToWriteableBitmap();
-                                realBitmap.Freeze();
+                                        realBitmap = targetBitmap.ToWriteableBitmap();
+                                        realBitmap.Freeze();
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"SkiaSharp 加载失败 {info.PreviewImageFullPath}: {ex.Message}");
+                                }
+                                if (realBitmap != null)
+                                {
+                                    await Task.Delay(30);
+
+                                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                                    {
+                                        image.Source = realBitmap;
+                                    });
+                                }
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"SkiaSharp 加载失败 {info.PreviewImageFullPath}: {ex.Message}");
-                        }
-                        if (realBitmap != null)
-                        {
-                            await Task.Delay(30);
-
-                            await Application.Current.Dispatcher.InvokeAsync(() =>
+                            finally
                             {
-                                image.Source = realBitmap;
-                            });
-                        }
-                    }
-                    finally
-                    {
-                        _loadSemaphore.Release();
-                    }
-                });
+                                _loadSemaphore.Release();
+                            }
+                        });
             }
         }
     }

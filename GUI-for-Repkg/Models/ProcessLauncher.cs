@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
 using System.IO;
-using Newtonsoft.Json.Linq;
 using System.Windows;
-using System.Text;
 
 namespace GUI_for_Repkg.Models
 {
@@ -18,7 +12,7 @@ namespace GUI_for_Repkg.Models
             public int CompletedCount { get; set; }
             public int TotalCount { get; set; }
             public string Message { get; set; }
-            public double Percentage => TotalCount > 0 ? (double)CompletedCount / TotalCount * 100 : 0; 
+            public double Percentage => TotalCount > 0 ? (double)CompletedCount / TotalCount * 100 : 0;
         }
 
         private static string GetSafeFolderName(string rawName)
@@ -49,7 +43,7 @@ namespace GUI_for_Repkg.Models
             int maxDegreeOfParallelism,
             bool wallpaperengineOutputMode,
             CancellationToken token,
-            ManualResetEventSlim pauseEvent, 
+            ManualResetEventSlim pauseEvent,
             IProgress<ProcessProgressReport> progressReport = null)
         {
             var folderList = new List<string>(folders);
@@ -80,7 +74,7 @@ namespace GUI_for_Repkg.Models
             string copyProjectJson = mainWindow?.CopyProjectJson.IsChecked == true ? " -c" : "";
             //判断是否从“已有壁纸”导入
             string outputMode = wallpaperengineOutputMode ? "\\scene.pkg" : "";
-            
+
             string SettingOptions = justSaveImages + dontTransfornTexFiles + putAllFilesInOneFolder + coverAllFiles + copyProjectJson;
 
             await Task.Run(() =>
@@ -158,7 +152,7 @@ namespace GUI_for_Repkg.Models
                         {
                             string safeTitle = GetSafeFolderName(rawTitle);
 
-                            // 处理重名冲突：自动加 (1), (2)...
+                            //处理重名冲突：自动加(1),(2)...
                             string candidateName = safeTitle;
                             int suffix = 1;
                             string candidatePath = Path.Combine(outputRootPath, candidateName);
@@ -204,7 +198,7 @@ namespace GUI_for_Repkg.Models
                         //Flatten()会把嵌套的异常摊平
                         ae.Handle(ex =>
                         {
-                            return ex is OperationCanceledException; // 如果是取消异常，视为“已处理”
+                            return ex is OperationCanceledException; //如果是取消异常，视为“已处理”
                         });
 
                         throw new OperationCanceledException();

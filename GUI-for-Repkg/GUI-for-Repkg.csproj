@@ -13,6 +13,7 @@
 	  <AssemblyVersion>1.0.0</AssemblyVersion>
 	<Authors>ReZe20</Authors>
 	<Copyright>Copyright © ReZe20 2026</Copyright>
+	<ApplicationIcon>GUI-for-RePKG.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,12 +24,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MahApps.Metro" Version="2.4.11" />
+    <Content Include="GUI-for-RePKG.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MahApps.Metro.IconPacks" Version="6.2.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageReference Include="SkiaSharp" Version="3.119.1" />
     <PackageReference Include="SkiaSharp.Views.WPF" Version="3.119.1" />
-    <PackageReference Include="VirtualizingWrapPanel" Version="2.3.2" />
   </ItemGroup>
 
   <ItemGroup>
