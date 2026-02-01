@@ -235,6 +235,7 @@
                             </Button>
 
                             <ProgressBar x:Name="ConversionProgressBar1" Grid.Column="2" Height="20" Margin="2,0,68,0" VerticalAlignment="Bottom" />
+                            
                         </Grid>
                     </TabItem>
                     <TabItem Header="导入壁纸">
@@ -257,7 +258,7 @@
                                              VerticalAlignment="Top" 
                                              MinWidth="10"/>
                                     <TextBox x:Name="OneOutputPath" TextChanged="FileOutputChangedCheck" HorizontalAlignment="Stretch" Margin="63,39,73,0" TextWrapping="NoWrap" VerticalAlignment="Top" MinWidth="10"/>
-                                    <Button Content="选择文件" x:Name="OneWallpaperChooseButton" Click="ChooseOneWallpaper_Click" HorizontalAlignment="Right" Margin="0,9,0,0" VerticalAlignment="Top" Width="65"/>
+                                    <Button Content="壁纸文件" x:Name="OneWallpaperChooseButton" Click="ChooseOneWallpaper_Click" HorizontalAlignment="Right" Margin="0,9,0,0" VerticalAlignment="Top" Width="65"/>
                                     <Button Content="输出路径" x:Name="OneWallpaperOutPathButton" Click="ChooseOneWallpaperOutputPath" HorizontalAlignment="Right" Margin="0,38,0,0" VerticalAlignment="Top" Width="65"/>
                                     <TextBlock HorizontalAlignment="Left" Margin="12,11,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="zh-cn" Text="壁纸路径"/></TextBlock>
                                     <TextBlock HorizontalAlignment="Left" Margin="12,40,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="zh-cn" Text="输出路径"/></TextBlock>
@@ -366,7 +367,7 @@
                                 <ToolTip>
                                     <StackPanel Width="220">
                                         <TextBlock Text="只转换Tex文件" FontWeight="Bold" TextWrapping="Wrap"/>
-                                        <TextBlock Text="图像文件一般保存在Tex文件中" TextWrapping="Wrap" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
+                                        <TextBlock Text="图像文件保存在Tex文件中" TextWrapping="Wrap" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
                                     </StackPanel>
                                 </ToolTip>
                             </CheckBox.ToolTip>
@@ -402,7 +403,7 @@
                                 <ToolTip>
                                     <StackPanel Width="220">
                                         <TextBlock Text="覆盖所有文件" TextWrapping="Wrap" FontWeight="Bold"/>
-                                        <TextBlock Text="覆盖每个壁纸输出文件夹中文件" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
+                                        <TextBlock Text="程序将对RePKG.exe输入--overwrite指令。我自己都没搞明白这东西怎么运作" TextWrapping="Wrap" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
                                     </StackPanel>
                                 </ToolTip>
                             </CheckBox.ToolTip>

@@ -618,7 +618,7 @@ namespace GUI_for_Repkg
             }
 
             _cts = new CancellationTokenSource();
-            _pauseEvent = new ManualResetEventSlim(true); // true 表示初始状态为“运行中”（非暂停）
+            _pauseEvent = new ManualResetEventSlim(true); //true表示初始状态为“运行中”
             _isPaused = false;
 
             ToggleControlButtons(true);
@@ -633,7 +633,9 @@ namespace GUI_for_Repkg
                 //Progress<T>会自动在UI线程上调用，这里不需要再Dispatcher.Invoke
                 SituationPresentation.Text = report.Message;
                 ConversionProgressBar1.Value = report.Percentage;
-                ConversionProgressBar2.Foreground = NativeRed;
+                ConversionProgressBar2.Value = report.Percentage; 
+                ConversionProgressBar1.Foreground = NativeGreen;
+                ConversionProgressBar2.Foreground = NativeGreen;
                 TaskBarProgress.ProgressValue = report.Percentage / 100;
                 SelectedCount.Text = $"已完成: {report.CompletedCount}/{report.TotalCount}";
             });
@@ -655,13 +657,13 @@ namespace GUI_for_Repkg
             catch (OperationCanceledException)
             {
                 SituationPresentation.Text = "提取已停止";
+                UpdateProgressState("Error");
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"处理过程中发生错误：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 SituationPresentation.Text = "处理失败";
                 UpdateProgressState("Error");
-                UnenabledStartButtonAndSettingCheckbox();
             }
             finally
             {
@@ -677,7 +679,7 @@ namespace GUI_for_Repkg
             {
                 _pauseEvent.Reset();
                 _isPaused = true;
-                SituationPresentation.Text = " 任务已暂停...";
+                SituationPresentation.Text = "任务已暂停...";
 
                 BtnPause1.IsEnabled = false;
                 BtnPause2.IsEnabled = false;
@@ -729,8 +731,6 @@ namespace GUI_for_Repkg
 
         private void ToggleControlButtons(bool isRunning)
         {
-            StartProcessButton.IsEnabled = !isRunning;
-
             BtnStop1.IsEnabled = isRunning;
             BtnStop2.IsEnabled = isRunning;
 
@@ -1060,37 +1060,6 @@ namespace GUI_for_Repkg
             }
         }
 
-        private void ChooseOneWallpaperFileOutputPath(object sender, RoutedEventArgs e)
-        {
-            bool isFileValid = false;
-
-            while (!isFileValid)
-            {
-                OpenFolderDialog openFileDialog = new OpenFolderDialog();
-
-                openFileDialog.Title = "请选择输出目录";
-
-                if (openFileDialog.ShowDialog() == true)
-                {
-                    string selectedFile = openFileDialog.FolderName;
-                    if (selectedFile.Contains(" "))
-                    {
-                        MessageBox.Show(
-                            $"请勿选择包含空格的文件夹路径：\n{selectedFile}\n",
-                            "路径不合法",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Information);
-                    }
-                    else
-                    {
-                        isFileValid = true;
-                        MultipleWallpaperFilesOutputPath.Text = selectedFile;
-                    }
-                }
-                else return;
-            }
-        }
-
         private void WallpapersFolder_Drop(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
@@ -1243,25 +1212,29 @@ namespace GUI_for_Repkg
                 outputPath = OneOutputPath.Text != "" ? OneOutputPath.Text : MultipleWallpaperFilesOutputPath.Text;
             }
 
-            UnenabledStartButtonAndSettingCheckbox();
-            UpdateProgressState("Normal");
-
             _cts = new CancellationTokenSource();
             _pauseEvent = new ManualResetEventSlim(true);
             _isPaused = false;
 
-            var progress = new Progress<ProcessProgressReport>(report =>
+            UpdateProgressState("Normal");
+            ToggleControlButtons(true);
+            UnenabledStartButtonAndSettingCheckbox();
+
+            int threadCount = multithreading.IsChecked == true ? (int)cmbThreadCount.SelectedItem : 1;
+
+            var progressreport = new Progress<ProcessProgressReport>(report =>
             {
                 SituationPresentation.Text = report.Message;
                 ConversionProgressBar1.Value = report.Percentage;
                 ConversionProgressBar2.Value = report.Percentage;
-                SelectedCount.Text = $"正在处理: {report.CompletedCount}/{report.TotalCount}";
+                ConversionProgressBar1.Foreground = NativeGreen;
+                ConversionProgressBar2.Foreground = NativeGreen;
+                TaskBarProgress.ProgressValue = report.Percentage / 100;
+                SelectedCount.Text = $"已完成: {report.CompletedCount}/{report.TotalCount}";
             });
 
             try
             {
-                int threadCount = multithreading.IsChecked == true ? (int)cmbThreadCount.SelectedItem : 1;
-
                 await ProcessLauncher.LaunchAsync(
                     _pendingFiles.ToList(),
                     repkgExePath,
@@ -1270,7 +1243,7 @@ namespace GUI_for_Repkg
                     false,
                     _cts.Token,
                     _pauseEvent,
-                    progress);
+                    progressreport);
 
                 MessageBox.Show("转换队列执行完毕！", "完成", MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -1279,18 +1252,21 @@ namespace GUI_for_Repkg
                 SituationPresentation.Text = "任务已被用户停止";
                 UpdateProgressState("Error");
                 UnenabledStartButtonAndSettingCheckbox();
+                ToggleControlButtons(false);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"处理过程中出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 UpdateProgressState("Error");
                 UnenabledStartButtonAndSettingCheckbox();
+                ToggleControlButtons(false);
             }
             finally
             {
                 UnenabledStartButtonAndSettingCheckbox();
-                ConversionProgressBar1.Value = 0;
-                ConversionProgressBar2.Value = 0;
+                ToggleControlButtons(false);
+                SelectedFilesPanel.Children.Clear();
+                _pendingFiles.Clear();
             }
         }
 

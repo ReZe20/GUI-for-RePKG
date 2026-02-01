@@ -168,6 +168,8 @@ namespace GUI_for_Repkg.Models
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                     RenderTransformOrigin = new Point(0.5, 0.5),
                 };
+                var scaleTransform = new ScaleTransform(normalScale, normalScale);
+                image.RenderTransform = scaleTransform;
 
                 var backGroundShadow = new Border
                 {
@@ -177,9 +179,6 @@ namespace GUI_for_Repkg.Models
                     RenderTransformOrigin = new Point(0.5, 0.5),
                     Effect = dropShadow
                 };
-
-                var scaleTransform = new ScaleTransform(normalScale, normalScale);
-                image.RenderTransform = scaleTransform;
 
                 var titleTextBlock = new TextBlock
                 {
@@ -219,18 +218,6 @@ namespace GUI_for_Repkg.Models
                     RenderTransform = scaleTransform
                 };
                 checkBox.Click += checkBoxClickHandler;
-
-                var mouseEventCheckBox = new CheckBox
-                {
-                    HorizontalAlignment = HorizontalAlignment.Left,
-                    VerticalAlignment = VerticalAlignment.Top,
-                    Width = 100,
-                    Height = 100,
-                    Tag = info.FolderPath,
-                    Margin = new Thickness(10),
-                    RenderTransformOrigin = new Point(0.8, 0.8),
-                    RenderTransform = scaleTransform
-                };
 
                 grid.Children.Add(backGroundShadow);
                 grid.Children.Add(image);

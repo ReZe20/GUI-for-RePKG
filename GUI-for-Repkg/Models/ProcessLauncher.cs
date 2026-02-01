@@ -118,6 +118,28 @@ namespace GUI_for_Repkg.Models
                             }
                         }
 
+                        bool isMPKG = false;
+                        string oldFileName = null;
+                        if (!wallpaperengineOutputMode)
+                        {
+                            if (folder.EndsWith(".mpkg", StringComparison.OrdinalIgnoreCase))
+                            {
+                                var newFolder = Path.ChangeExtension(folder, ".pkg");
+                                oldFileName = folder;
+
+                                try
+                                {
+                                    File.Move(folder, newFolder);
+                                    folder = newFolder;
+                                }
+                                catch (IOException ex)
+                                {
+                                    MessageBox.Show($"转换.mpkg文件失败，程序在对其重命名时发生错误：{ex.Message}");
+                                }
+                                isMPKG = true;
+                            }
+                        }
+
                         string tempFolderName = workshopId;
                         string tempOutputPath = Path.Combine(outputRootPath, tempFolderName);
 
@@ -145,6 +167,11 @@ namespace GUI_for_Repkg.Models
                                 }
                                 process.WaitForExit();
                             }
+                        }
+
+                        if (isMPKG)
+                        {
+                            File.Move(folder, oldFileName);
                         }
 
                         string finalFolderName = tempFolderName;
