@@ -235,7 +235,7 @@
                             </Button>
 
                             <ProgressBar x:Name="ConversionProgressBar1" Grid.Column="2" Height="20" Margin="2,0,68,0" VerticalAlignment="Bottom" />
-                            
+
                         </Grid>
                     </TabItem>
                     <TabItem Header="导入壁纸">
@@ -350,7 +350,7 @@
                 </Grid.RowDefinitions>
                 <GroupBox Grid.Row="0" Header="转换设置">
                     <Grid>
-                        <CheckBox x:Name="UseProjectNameForFile" VerticalAlignment="Top" Margin="15,20,0,0">
+                        <CheckBox x:Name="UseProjectNameForFile" Click="SettingChanged_Save" IsChecked="{Binding UseProjectNameForFile}" VerticalAlignment="Top" Margin="15,20,0,0">
                             <CheckBox.ToolTip>
                                 <ToolTip>
                                     <StackPanel Width="220">
@@ -362,7 +362,7 @@
                             <TextBlock Text="使用壁纸名作为子目录名称而非ID（仅在“已有壁纸”页面中生效）"/>
                         </CheckBox>
 
-                        <CheckBox x:Name="JustSaveImages" VerticalAlignment="Top" Margin="15,45,0,0">
+                        <CheckBox x:Name="JustSaveImages" Click="SettingChanged_Save" IsChecked="{Binding JustSaveImages}" VerticalAlignment="Top" Margin="15,45,0,0">
                             <CheckBox.ToolTip>
                                 <ToolTip>
                                     <StackPanel Width="220">
@@ -374,7 +374,7 @@
                             <TextBlock Text="只转换Tex文件"/>
                         </CheckBox>
 
-                        <CheckBox x:Name="DontTransformTexFiles" VerticalAlignment="Top" Margin="15,70,0,0">
+                        <CheckBox x:Name="DontTransformTexFiles" Click="SettingChanged_Save" IsChecked="{Binding DontTransformTexFiles}" VerticalAlignment="Top" Margin="15,70,0,0">
                             <CheckBox.ToolTip>
                                 <ToolTip>
                                     <StackPanel Width="220">
@@ -386,7 +386,7 @@
                             <TextBlock Text="不将Tex文件转换为图像"/>
                         </CheckBox>
 
-                        <CheckBox x:Name="PutAllFilesInOneDirectory" VerticalAlignment="Top" Margin="15,95,0,0">
+                        <CheckBox x:Name="PutAllFilesInOneDirectory" Click="SettingChanged_Save" IsChecked="{Binding PutAllFilesInOneDirectory}" VerticalAlignment="Top" Margin="15,95,0,0">
                             <CheckBox.ToolTip>
                                 <ToolTip>
                                     <StackPanel Width="220">
@@ -398,11 +398,11 @@
                             <TextBlock Text="将所有提取的文件放到一个目录中，而不是保留它们的原始路径"/>
                         </CheckBox>
 
-                        <CheckBox x:Name="CoverAllFiles" VerticalAlignment="Top" Margin="15,120,0,0">
+                        <CheckBox x:Name="CoverAllFiles" Click="SettingChanged_Save" IsChecked="{Binding CoverAllFiles}" VerticalAlignment="Top" Margin="15,120,0,0">
                             <CheckBox.ToolTip>
                                 <ToolTip>
                                     <StackPanel Width="220">
-                                        <TextBlock Text="覆盖所有文件" TextWrapping="Wrap" FontWeight="Bold"/>
+                                        <TextBlock Text="覆盖所有文件"  TextWrapping="Wrap" FontWeight="Bold"/>
                                         <TextBlock Text="程序将对RePKG.exe输入--overwrite指令。我自己都没搞明白这东西怎么运作" TextWrapping="Wrap" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
                                     </StackPanel>
                                 </ToolTip>
@@ -410,7 +410,7 @@
                             <TextBlock Text="覆盖所有现有文件"/>
                         </CheckBox>
 
-                        <CheckBox x:Name="CopyProjectJson" VerticalAlignment="Top" Margin="15,145,0,0">
+                        <CheckBox x:Name="CopyProjectJson" Click="SettingChanged_Save" IsChecked="{Binding CopyProjectJson}" VerticalAlignment="Top" Margin="15,145,0,0">
                             <CheckBox.ToolTip>
                                 <ToolTip>
                                     <StackPanel Width="220">
@@ -442,14 +442,14 @@
                                 <TextBlock Text="多实例并行支持"/>
                             </CheckBox>
                             <TextBlock Text="最大实例数" HorizontalAlignment="Left" Margin="50,17,0,0"/>
-                            <ComboBox x:Name="cmbThreadCount" Width="55" Height="20" HorizontalAlignment="Left" Margin="115,0,0,0"/>
+                            <ComboBox x:Name="cmbThreadCount" SelectedItem="{Binding multithreadingNum}" Width="55" Height="20" HorizontalAlignment="Left" Margin="115,0,0,0"/>
                         </Grid>
                     </Grid>
                 </GroupBox>
 
                 <GroupBox Grid.Row="1" Header="启动设置">
                     <Grid>
-                        <CheckBox x:Name="LoadImageWhenStart" VerticalAlignment="Top" Margin="15,20,0,0" IsChecked="True">
+                        <CheckBox x:Name="LoadImageWhenStart" Click="SettingChanged_Save" IsChecked="{Binding LoadImageWhenStart}" VerticalAlignment="Top" Margin="15,20,0,0">
                             <CheckBox.ToolTip>
                                 <ToolTip>
                                     <StackPanel Width="220">
@@ -461,7 +461,7 @@
                             <TextBlock Text="每次启动时自动加载已有壁纸列表"/>
                         </CheckBox>
                         <TextBlock Text="已有壁纸路径" Margin="15,45,0,0"/>
-                        <TextBox x:Name="WallpapersFile" TextChanged="WallpapersFilePathChanged" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="15,65,80,0"/>
+                        <TextBox x:Name="WallpapersFile" Text="{Binding WallpapersFile}" TextChanged="WallpapersFilePathChanged" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="15,65,80,0"/>
                         <Button Content="恢复默认" HorizontalAlignment="Right" Margin="0,65,15,0" VerticalAlignment="Top" Width="60"  Click="RestoreDefaultWallpapersPath_Click"/>
                     </Grid>
                 </GroupBox>
@@ -471,22 +471,29 @@
             <Grid>
                 <GroupBox Header="关于">
                     <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="140"/>
+                            <RowDefinition Height="110"/>
+                            <RowDefinition Height="539*"/>
+                        </Grid.RowDefinitions>
                         <TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0" TextWrapping="Wrap" Text="GUI-for-Repkg" Height="33" FontSize="24" />
                         <TextBlock HorizontalAlignment="Left" Margin="53,48,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="18" Text="版本：" FontWeight="Bold"/>
                         <TextBlock x:Name="GUIVersion" HorizontalAlignment="Left" Margin="100,48,0,0" TextWrapping="Wrap" Text="" FontSize="18" VerticalAlignment="Top"/>
                         <TextBlock HorizontalAlignment="Left" Margin="53,80,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="18" Text="作者：" FontWeight="Bold"/>
                         <TextBlock x:Name="GUIdeveloper" HorizontalAlignment="Left" Margin="100,80,0,0" TextWrapping="NoWrap" Text="" FontSize="18" VerticalAlignment="Top" />
+                        <TextBlock HorizontalAlignment="Left" Margin="53,112,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="18" Text="开源协议：" FontWeight="Bold"/>
+                        <TextBlock HorizontalAlignment="Left" Text="MIT License" Margin="135,112,0,0" TextWrapping="NoWrap" FontSize="18" VerticalAlignment="Top" />
                         <Button Style="{StaticResource CircleIconButton}" Width="30" Height="30" Click="GUIGitHubButton_Click" Cursor="Hand" Margin="180,12,0,0" Background="{x:Null}" BorderBrush="{x:Null}" VerticalAlignment="Top" HorizontalAlignment="Left">
                             <iconPacks:PackIconFontAwesome Kind="GithubBrands" 
                                        Width="25" Height="25" HorizontalAlignment="Center">
                             </iconPacks:PackIconFontAwesome>
                             <Button.ToolTip>
-                                <StackPanel Width="220">
-                                    <TextBlock Text="点击访问GUI-for-RePKG的Github仓库" TextWrapping="Wrap" FontWeight="Bold"/>
+                                <StackPanel Width="200">
+                                    <TextBlock Text="访问GUI-for-RePKG的Github仓库" TextWrapping="Wrap" FontWeight="Bold"/>
                                 </StackPanel>
                             </Button.ToolTip>
                         </Button>
-                        <Button Style="{StaticResource CircleIconButton}" Width="30" Height="30" Click="GUIBilibiliButton_Click" Cursor="Hand" Margin="210,12,0,0" Background="{x:Null}" BorderBrush="{x:Null}" VerticalAlignment="Top" HorizontalAlignment="Left">
+                        <Button Style="{StaticResource CircleIconButton}" Width="30" Height="30" Click="GUIBilibiliButton_Click" Cursor="Hand" Margin="170,75,0,0" Background="{x:Null}" BorderBrush="{x:Null}" VerticalAlignment="Top" HorizontalAlignment="Left">
                             <iconPacks:PackIconFontAwesome Kind="BilibiliBrands" Width="25" Height="25" HorizontalAlignment="Center">
                             </iconPacks:PackIconFontAwesome>
                             <Button.ToolTip>
@@ -495,21 +502,34 @@
                                 </StackPanel>
                             </Button.ToolTip>
                         </Button>
+                        <Button Style="{StaticResource CircleIconButton}" Width="30" Height="30" Click="GUIGiteeButton_Click" Cursor="Hand" Margin="210,12,0,0" BorderBrush="{x:Null}" VerticalAlignment="Top" HorizontalAlignment="Left">
+                            <Image Source="/Assets/giteeButton.ico" Stretch="Uniform" Cursor="Hand" Margin="2,0,2,0"/>
+                            <Button.ToolTip>
+                                <StackPanel Width="200">
+                                    <TextBlock Text="访问GUI-for-RePKG的Gitee仓库" TextWrapping="Wrap" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Button.ToolTip>
+                        </Button>
 
-                        <TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,120,0,0" TextWrapping="Wrap" Text="RePKG" Height="33" FontSize="24"/>
-                        <TextBlock HorizontalAlignment="Left" Margin="53,158,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="18" Text="版本：" FontWeight="Bold"/>
-                        <TextBlock x:Name="RePKGVersion" HorizontalAlignment="Left" Margin="100,158,0,0" TextWrapping="Wrap" Text="" FontSize="18" VerticalAlignment="Top"/>
-                        <TextBlock HorizontalAlignment="Left" Margin="53,190,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="18" Text="作者：" FontWeight="Bold"/>
-                        <TextBlock x:Name="RePKGdeveloper" HorizontalAlignment="Left" Margin="100,190,0,0" TextWrapping="Wrap" Text="" FontSize="18" VerticalAlignment="Top" Cursor="Hand"/>
-                        <Button Style="{StaticResource CircleIconButton}" Width="30" Height="30" Click="RePKGGitHubButton_Click" Cursor="Hand" Margin="90,120,0,0" Background="{x:Null}" BorderBrush="{x:Null}" VerticalAlignment="Top" HorizontalAlignment="Left">
+                        <TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,8,0,0" TextWrapping="Wrap" Text="RePKG" Height="33" FontSize="24" Grid.Row="1"/>
+                        <TextBlock HorizontalAlignment="Left" Margin="53,46,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="18" Text="版本：" FontWeight="Bold" Cursor="Hand" Grid.Row="1"/>
+                        <TextBlock x:Name="RePKGVersion" HorizontalAlignment="Left" Margin="100,46,0,0" TextWrapping="Wrap" Text="" FontSize="18" VerticalAlignment="Top" Grid.Row="1"/>
+                        <TextBlock HorizontalAlignment="Left" Margin="53,78,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="18" Text="作者：" FontWeight="Bold" Grid.Row="1"/>
+                        <TextBlock x:Name="RePKGdeveloper" HorizontalAlignment="Left" Margin="100,78,0,0" TextWrapping="Wrap" Text="" FontSize="18" VerticalAlignment="Top" Cursor="Hand" Grid.Row="1"/>
+                        <Button Style="{StaticResource CircleIconButton}" Width="30" Height="30" Click="RePKGGitHubButton_Click" Cursor="Hand" Margin="90,8,0,0" Background="{x:Null}" BorderBrush="{x:Null}" VerticalAlignment="Top" HorizontalAlignment="Left" Grid.Row="1">
                             <iconPacks:PackIconFontAwesome Kind="GithubBrands" Width="25" Height="25" HorizontalAlignment="Center">
                             </iconPacks:PackIconFontAwesome>
                             <Button.ToolTip>
-                            <StackPanel Width="170">
-                                <TextBlock Text="点击访问RePKG的Github仓库" TextWrapping="Wrap" FontWeight="Bold"/>
-                            </StackPanel>
+                                <StackPanel Width="160">
+                                    <TextBlock Text="访问RePKG的Github仓库" TextWrapping="Wrap" FontWeight="Bold"/>
+                                </StackPanel>
                             </Button.ToolTip>
                         </Button>
+
+                        <TextBlock Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0" TextWrapping="Wrap" Text="· 本工具仅用于个人学习和壁纸技术研究，旨在提供更便捷的操作界面" Height="33" FontSize="18"/>
+                        <TextBlock Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,106,0,0" TextWrapping="Wrap" Text="· 严禁将通过本工具获取的任何资源用于商业目的、二次上传或非法分发。请务必尊重原作者的劳动成果" Height="45" FontSize="18"/>
+                        <TextBlock Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,42,0,0" TextWrapping="Wrap" Text="· 因违规使用素材导致的版权争议或法律后果，由用户本人承担全部责任。" Height="45" FontSize="18"/>
+                        <TextBlock Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,74,0,0" TextWrapping="Wrap" Text="· 本程序不存储、不提供任何版权素材，仅作为图形化调用接口使用。" Height="45" FontSize="18"/>
                     </Grid>
                 </GroupBox>
             </Grid>

@@ -1,4 +1,5 @@
 ﻿using GUI_for_Repkg.Models;
+using GUI_for_RePKG.Models;
 using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
@@ -22,6 +23,8 @@ namespace GUI_for_Repkg
     /// </summary>
     public partial class MainWindow : Window
     {
+        private AppSettings _settings;
+
         private const double ShadowDisableThreshold = 1500;
         private bool _isShadowEnabled = true;
 
@@ -50,6 +53,7 @@ namespace GUI_for_Repkg
         {
             InitializeComponent();
 
+            LoadConfigToUI();
             ReadGUIversion();
             ReadRePKGversion(repkgExePath);
             PopulateThreadCount();
@@ -59,6 +63,36 @@ namespace GUI_for_Repkg
             this.Loaded += MainWindow_Loaded;
             this.SizeChanged += MainWindow_SizeChanged;
             ThumbnailScrollViewer.SizeChanged += (s, e) => UpdateThumbnailSize();
+        }
+
+        private void LoadConfigToUI()
+        {
+            _settings = ConfigManager.Load();
+
+            UseProjectNameForFile.IsChecked = _settings.UseProjectNameForFile;
+            JustSaveImages.IsChecked = _settings.JustSaveImages;
+            DontTransformTexFiles.IsChecked = _settings.DontTransformTexFiles;
+            PutAllFilesInOneDirectory.IsChecked = _settings.PutAllFilesInOneDirectory;
+            CoverAllFiles.IsChecked = _settings.CoverAllFiles;
+            CopyProjectJson.IsChecked = _settings.CopyProjectJson;
+
+            cmbThreadCount.SelectedItem = _settings.multithreadingNum;
+            LoadImageWhenStart.IsChecked = _settings.LoadImageWhenStart;
+            WallpapersFile.Text = _settings.WallpapersFile;
+        }
+        private void SettingChanged_Save(object sender, RoutedEventArgs e)
+        {
+            _settings.UseProjectNameForFile = UseProjectNameForFile.IsChecked ?? false;
+            _settings.JustSaveImages = JustSaveImages.IsChecked ?? false;
+            _settings.DontTransformTexFiles = DontTransformTexFiles.IsChecked ?? false;
+            _settings.PutAllFilesInOneDirectory = PutAllFilesInOneDirectory.IsChecked ?? false;
+            _settings.CoverAllFiles = CoverAllFiles.IsChecked ?? false;
+            _settings.CopyProjectJson = CopyProjectJson.IsChecked ?? false;
+
+            _settings.LoadImageWhenStart = LoadImageWhenStart.IsChecked ?? false;
+            _settings.WallpapersFile = WallpapersFile.Text;
+
+            ConfigManager.Save(_settings);
         }
 
         private void ReadGUIversion()
@@ -1322,6 +1356,8 @@ namespace GUI_for_Repkg
 
         private void WallpapersFilePathChanged(object sender, TextChangedEventArgs e)
         {
+            SettingChanged_Save(sender, e);
+
             string currentText = ((TextBox)sender).Text;
             if (!string.IsNullOrWhiteSpace(currentText))
             {
@@ -1401,6 +1437,23 @@ namespace GUI_for_Repkg
         private void GUIBilibiliButton_Click(object sender, RoutedEventArgs e)
         {
             string url = "https://space.bilibili.com/504365497";
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("打开链接出现错误", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void GUIGiteeButton_Click(object sender, RoutedEventArgs e)
+        {
+            string url = "https://gitee.com/Re-Ze/gui-for-re-pkg";
             try
             {
                 Process.Start(new ProcessStartInfo

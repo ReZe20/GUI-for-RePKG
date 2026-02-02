@@ -13,7 +13,7 @@
 	  <AssemblyVersion>1.0.0</AssemblyVersion>
 	<Authors>ReZe20</Authors>
 	<Copyright>Copyright © ReZe20 2026</Copyright>
-	<ApplicationIcon>GUI-for-RePKG.ico</ApplicationIcon>
+	<ApplicationIcon>Assets\GUI-for-RePKG.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,7 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="GUI-for-RePKG.ico" />
+    <None Remove="Assets\giteeButton.ico" />
+    <None Remove="giteeButton.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,15 +35,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ApplicationDefinition Update="App.xaml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </ApplicationDefinition>
+    <Resource Include="Assets\giteeButton.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="RePKG.exe">
+    <ApplicationDefinition Update="App.xaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </ApplicationDefinition>
   </ItemGroup>
 
 </Project>
