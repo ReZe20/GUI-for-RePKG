@@ -1,6 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
 using System.IO;
-using Newtonsoft.Json;
 
 namespace GUI_for_RePKG.Models
 {
@@ -12,14 +11,15 @@ namespace GUI_for_RePKG.Models
         public bool PutAllFilesInOneDirectory { get; set; } = false;
         public bool CoverAllFiles { get; set; } = false;
         public bool CopyProjectJson { get; set; } = false;
-        public int multithreadingNum { get; set; } = 1;
-        public bool LoadImageWhenStart { get; set; } = true;
-        public string WallpapersFile { get; set; } = null;
+        public bool multithreading { get; set; } = true;
+        public bool multithreadingEnabled { get; set; } = true;
+        public int multithreadingNum { get; set; } = 0;
+        public string WallpapersFile { get; set; } = "";
     }
 
     public static class ConfigManager
     {
-        private static readonly string FilePath = Path.Combine("config.json");
+        private static readonly string FilePath = Path.Combine(AppContext.BaseDirectory, "config.json");
         public static void Save(AppSettings settings)
         {
             string json = JsonConvert.SerializeObject(settings, Formatting.Indented);

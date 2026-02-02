@@ -1,5 +1,4 @@
-﻿//ThumbnailLoader.cs
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using SkiaSharp;
 using SkiaSharp.Views.WPF;
 using System.IO;

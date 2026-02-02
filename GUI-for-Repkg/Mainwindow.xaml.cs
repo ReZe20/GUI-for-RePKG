@@ -23,6 +23,7 @@ namespace GUI_for_Repkg
     /// </summary>
     public partial class MainWindow : Window
     {
+        private bool isInitializing = true;
         private AppSettings _settings;
 
         private const double ShadowDisableThreshold = 1500;
@@ -51,18 +52,21 @@ namespace GUI_for_Repkg
 
         public MainWindow()
         {
+            isInitializing = true;
             InitializeComponent();
 
+            PopulateThreadCount();
             LoadConfigToUI();
             ReadGUIversion();
             ReadRePKGversion(repkgExePath);
-            PopulateThreadCount();
             ReadWallpaperEngineAdress();
             DefaultOutputPathSetting();
 
             this.Loaded += MainWindow_Loaded;
             this.SizeChanged += MainWindow_SizeChanged;
             ThumbnailScrollViewer.SizeChanged += (s, e) => UpdateThumbnailSize();
+
+            isInitializing = false;
         }
 
         private void LoadConfigToUI()
@@ -75,21 +79,36 @@ namespace GUI_for_Repkg
             PutAllFilesInOneDirectory.IsChecked = _settings.PutAllFilesInOneDirectory;
             CoverAllFiles.IsChecked = _settings.CoverAllFiles;
             CopyProjectJson.IsChecked = _settings.CopyProjectJson;
-
-            cmbThreadCount.SelectedItem = _settings.multithreadingNum;
-            LoadImageWhenStart.IsChecked = _settings.LoadImageWhenStart;
             WallpapersFile.Text = _settings.WallpapersFile;
         }
         private void SettingChanged_Save(object sender, RoutedEventArgs e)
         {
+            if (isInitializing) return;
+
+            if (_settings == null) _settings = new AppSettings();
+
             _settings.UseProjectNameForFile = UseProjectNameForFile.IsChecked ?? false;
             _settings.JustSaveImages = JustSaveImages.IsChecked ?? false;
             _settings.DontTransformTexFiles = DontTransformTexFiles.IsChecked ?? false;
             _settings.PutAllFilesInOneDirectory = PutAllFilesInOneDirectory.IsChecked ?? false;
             _settings.CoverAllFiles = CoverAllFiles.IsChecked ?? false;
             _settings.CopyProjectJson = CopyProjectJson.IsChecked ?? false;
+            _settings.multithreading = multithreading.IsChecked ?? false;
+            _settings.multithreadingEnabled = cmbThreadCount.IsEnabled;
 
-            _settings.LoadImageWhenStart = LoadImageWhenStart.IsChecked ?? false;
+            if (cmbThreadCount.SelectedItem is int selected)
+            {
+                _settings.multithreadingNum = selected;
+            }
+            else if (ThreadNumbers != null && ThreadNumbers.Count > 0)
+            {
+                _settings.multithreadingNum = ThreadNumbers.First();
+            }
+            else
+            {
+                _settings.multithreadingNum = 1;
+            }
+
             _settings.WallpapersFile = WallpapersFile.Text;
 
             ConfigManager.Save(_settings);
@@ -122,13 +141,19 @@ namespace GUI_for_Repkg
 
             if (logicalCores > 1)
             {
-                multithreading.IsChecked = true;
+                _settings ??= ConfigManager.Load();
+                multithreading.IsChecked = _settings.multithreading;
 
                 int max = Math.Max(logicalCores, 2);
-                ThreadNumbers = Enumerable.Range(2, max - 1).ToList();
 
+                ThreadNumbers = Enumerable.Range(2, max - 1).ToList();
                 cmbThreadCount.ItemsSource = ThreadNumbers;
-                cmbThreadCount.SelectedItem = max;
+                if (_settings.multithreadingNum < 2 || _settings.multithreadingNum > max)
+                    cmbThreadCount.SelectedItem = max;
+                else
+                    cmbThreadCount.SelectedItem = _settings.multithreadingNum;
+
+                cmbThreadCount.IsEnabled = _settings.multithreadingEnabled;
             }
             else
             {
@@ -140,32 +165,40 @@ namespace GUI_for_Repkg
 
         private void ReadWallpaperEngineAdress()
         {
-            try
+            _settings = ConfigManager.Load();
+            if (_settings.WallpapersFile == "")
             {
-                using (RegistryKey rootKey = Registry.CurrentUser)
+                try
                 {
-                    string[] possibleSubKeys = { @"Software\WallpaperEngine", @"Software\Wallpaper Engine" };
-
-                    foreach (var subKey in possibleSubKeys)
+                    using (RegistryKey rootKey = Registry.CurrentUser)
                     {
-                        using (RegistryKey weKey = rootKey.OpenSubKey(subKey))
-                        {
-                            if (weKey == null) continue;
+                        string[] possibleSubKeys = { @"Software\WallpaperEngine", @"Software\Wallpaper Engine" };
 
-                            object installPath = weKey.GetValue("installPath");
-                            if (installPath != null)
+                        foreach (var subKey in possibleSubKeys)
+                        {
+                            using (RegistryKey weKey = rootKey.OpenSubKey(subKey))
                             {
-                                WallpapersFile.Text = TruncateToLastChar((string)installPath, "\\common\\wallpaper_engine\\wallpaper64.exe")
-                                                      + "\\workshop\\content\\431960";
-                                return;
+                                if (weKey == null) continue;
+
+                                object installPath = weKey.GetValue("installPath");
+                                if (installPath != null)
+                                {
+                                    WallpapersFile.Text = TruncateToLastChar((string)installPath, "\\common\\wallpaper_engine\\wallpaper64.exe")
+                                                          + "\\workshop\\content\\431960";
+                                    return;
+                                }
                             }
                         }
                     }
                 }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"ReadWallpaperEngineUserSettings error: {ex}");
+                }
             }
-            catch (Exception ex)
+            else
             {
-                Debug.WriteLine($"ReadWallpaperEngineUserSettings error: {ex}");
+                WallpapersFile.Text = _settings.WallpapersFile;
             }
         }
 
@@ -352,10 +385,7 @@ namespace GUI_for_Repkg
         {
             this.Loaded -= MainWindow_Loaded;
 
-            if (LoadImageWhenStart.IsChecked == true)
-            {
-                await LoadThumbnailsAutomatically();
-            }
+            await LoadThumbnailsAutomatically();
         }
 
         private async Task LoadThumbnailsAutomatically()
@@ -667,7 +697,7 @@ namespace GUI_for_Repkg
                 //Progress<T>会自动在UI线程上调用，这里不需要再Dispatcher.Invoke
                 SituationPresentation.Text = report.Message;
                 ConversionProgressBar1.Value = report.Percentage;
-                ConversionProgressBar2.Value = report.Percentage; 
+                ConversionProgressBar2.Value = report.Percentage;
                 ConversionProgressBar1.Foreground = NativeGreen;
                 ConversionProgressBar2.Foreground = NativeGreen;
                 TaskBarProgress.ProgressValue = report.Percentage / 100;
@@ -1367,6 +1397,8 @@ namespace GUI_for_Repkg
 
         private void RestoreDefaultWallpapersPath_Click(object sender, RoutedEventArgs e)
         {
+            _settings.WallpapersFile = "";
+            ConfigManager.Save(_settings);
             ReadWallpaperEngineAdress();
         }
         private void Unenable_Left_Column_Click(object sender, RoutedEventArgs e)

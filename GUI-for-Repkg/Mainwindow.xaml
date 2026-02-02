@@ -345,12 +345,11 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="240"/>
-                    <RowDefinition Height="120"/>
-                    <RowDefinition Height="40*"/>
+                    <RowDefinition Height="90"/>
                 </Grid.RowDefinitions>
                 <GroupBox Grid.Row="0" Header="转换设置">
                     <Grid>
-                        <CheckBox x:Name="UseProjectNameForFile" Click="SettingChanged_Save" IsChecked="{Binding UseProjectNameForFile}" VerticalAlignment="Top" Margin="15,20,0,0">
+                        <CheckBox x:Name="UseProjectNameForFile" Click="SettingChanged_Save" VerticalAlignment="Top" Margin="15,20,0,0">
                             <CheckBox.ToolTip>
                                 <ToolTip>
                                     <StackPanel Width="220">
@@ -362,7 +361,7 @@
                             <TextBlock Text="使用壁纸名作为子目录名称而非ID（仅在“已有壁纸”页面中生效）"/>
                         </CheckBox>
 
-                        <CheckBox x:Name="JustSaveImages" Click="SettingChanged_Save" IsChecked="{Binding JustSaveImages}" VerticalAlignment="Top" Margin="15,45,0,0">
+                        <CheckBox x:Name="JustSaveImages" Click="SettingChanged_Save" VerticalAlignment="Top" Margin="15,45,0,0">
                             <CheckBox.ToolTip>
                                 <ToolTip>
                                     <StackPanel Width="220">
@@ -374,7 +373,7 @@
                             <TextBlock Text="只转换Tex文件"/>
                         </CheckBox>
 
-                        <CheckBox x:Name="DontTransformTexFiles" Click="SettingChanged_Save" IsChecked="{Binding DontTransformTexFiles}" VerticalAlignment="Top" Margin="15,70,0,0">
+                        <CheckBox x:Name="DontTransformTexFiles" Click="SettingChanged_Save" VerticalAlignment="Top" Margin="15,70,0,0">
                             <CheckBox.ToolTip>
                                 <ToolTip>
                                     <StackPanel Width="220">
@@ -386,7 +385,7 @@
                             <TextBlock Text="不将Tex文件转换为图像"/>
                         </CheckBox>
 
-                        <CheckBox x:Name="PutAllFilesInOneDirectory" Click="SettingChanged_Save" IsChecked="{Binding PutAllFilesInOneDirectory}" VerticalAlignment="Top" Margin="15,95,0,0">
+                        <CheckBox x:Name="PutAllFilesInOneDirectory" Click="SettingChanged_Save" VerticalAlignment="Top" Margin="15,95,0,0">
                             <CheckBox.ToolTip>
                                 <ToolTip>
                                     <StackPanel Width="220">
@@ -398,7 +397,7 @@
                             <TextBlock Text="将所有提取的文件放到一个目录中，而不是保留它们的原始路径"/>
                         </CheckBox>
 
-                        <CheckBox x:Name="CoverAllFiles" Click="SettingChanged_Save" IsChecked="{Binding CoverAllFiles}" VerticalAlignment="Top" Margin="15,120,0,0">
+                        <CheckBox x:Name="CoverAllFiles" Click="SettingChanged_Save" VerticalAlignment="Top" Margin="15,120,0,0">
                             <CheckBox.ToolTip>
                                 <ToolTip>
                                     <StackPanel Width="220">
@@ -410,7 +409,7 @@
                             <TextBlock Text="覆盖所有现有文件"/>
                         </CheckBox>
 
-                        <CheckBox x:Name="CopyProjectJson" Click="SettingChanged_Save" IsChecked="{Binding CopyProjectJson}" VerticalAlignment="Top" Margin="15,145,0,0">
+                        <CheckBox x:Name="CopyProjectJson" Click="SettingChanged_Save" VerticalAlignment="Top" Margin="15,145,0,0">
                             <CheckBox.ToolTip>
                                 <ToolTip>
                                     <StackPanel Width="220">
@@ -427,7 +426,8 @@
                                       VerticalAlignment="Top"
                                       Height="15"
                                       Checked="Multithreading_Checked"
-                                      Unchecked="Multithreading_Unchecked" >
+                                      Unchecked="Multithreading_Unchecked"
+                                      Click="SettingChanged_Save">
                                 <CheckBox.ToolTip>
                                     <ToolTip>
                                         <StackPanel Width="220">
@@ -442,27 +442,16 @@
                                 <TextBlock Text="多实例并行支持"/>
                             </CheckBox>
                             <TextBlock Text="最大实例数" HorizontalAlignment="Left" Margin="50,17,0,0"/>
-                            <ComboBox x:Name="cmbThreadCount" SelectedItem="{Binding multithreadingNum}" Width="55" Height="20" HorizontalAlignment="Left" Margin="115,0,0,0"/>
+                            <ComboBox x:Name="cmbThreadCount" SelectionChanged="SettingChanged_Save" Width="55" Height="20" HorizontalAlignment="Left" Margin="115,0,0,0"/>
                         </Grid>
                     </Grid>
                 </GroupBox>
 
                 <GroupBox Grid.Row="1" Header="启动设置">
                     <Grid>
-                        <CheckBox x:Name="LoadImageWhenStart" Click="SettingChanged_Save" IsChecked="{Binding LoadImageWhenStart}" VerticalAlignment="Top" Margin="15,20,0,0">
-                            <CheckBox.ToolTip>
-                                <ToolTip>
-                                    <StackPanel Width="220">
-                                        <TextBlock Text="自动加载已有壁纸" FontWeight="Bold" TextWrapping="Wrap" />
-                                        <TextBlock Text="开启此选项，每次打开程序将自动加载已有壁纸列表" TextWrapping="Wrap" Margin="0,6,0,0" FontSize="12" Opacity="0.8"/>
-                                    </StackPanel>
-                                </ToolTip>
-                            </CheckBox.ToolTip>
-                            <TextBlock Text="每次启动时自动加载已有壁纸列表"/>
-                        </CheckBox>
-                        <TextBlock Text="已有壁纸路径" Margin="15,45,0,0"/>
-                        <TextBox x:Name="WallpapersFile" Text="{Binding WallpapersFile}" TextChanged="WallpapersFilePathChanged" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="15,65,80,0"/>
-                        <Button Content="恢复默认" HorizontalAlignment="Right" Margin="0,65,15,0" VerticalAlignment="Top" Width="60"  Click="RestoreDefaultWallpapersPath_Click"/>
+                        <TextBlock Text="已有壁纸路径" VerticalAlignment="Top" Margin="15,15,0,0"/>
+                        <TextBox x:Name="WallpapersFile" TextChanged="WallpapersFilePathChanged" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="15,35,80,0"/>
+                        <Button Content="恢复默认" HorizontalAlignment="Right" Margin="0,35,15,0" VerticalAlignment="Top" Width="60"  Click="RestoreDefaultWallpapersPath_Click"/>
                     </Grid>
                 </GroupBox>
             </Grid>

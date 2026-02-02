@@ -24,7 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Assets\giteeButton.ico" />
     <None Remove="giteeButton.png" />
   </ItemGroup>
 
@@ -32,10 +31,6 @@
     <PackageReference Include="MahApps.Metro.IconPacks" Version="6.2.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="SkiaSharp.Views.WPF" Version="3.119.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="Assets\giteeButton.ico" />
   </ItemGroup>
 
   <ItemGroup>
