@@ -492,7 +492,7 @@
                             </Button.ToolTip>
                         </Button>
                         <Button Style="{StaticResource CircleIconButton}" Width="30" Height="30" Click="GUIGiteeButton_Click" Cursor="Hand" Margin="210,12,0,0" BorderBrush="{x:Null}" VerticalAlignment="Top" HorizontalAlignment="Left">
-                            <Image Source="/Assets/giteeButton.ico" Stretch="Uniform" Cursor="Hand" Margin="2,0,2,0"/>
+                            <Image Source="/Assets/gitee.png" Stretch="Uniform" Cursor="Hand" Margin="2,0,2,0"/>
                             <Button.ToolTip>
                                 <StackPanel Width="200">
                                     <TextBlock Text="访问GUI-for-RePKG的Gitee仓库" TextWrapping="Wrap" FontWeight="Bold"/>
