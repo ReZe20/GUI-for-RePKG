@@ -121,3 +121,6 @@
 
 ![结束任务.gif](https://github.com/ReZe20/GUI-for-RePKG/blob/master/docs/21.gif)
 
+# License
+
+[License](https://github.com/ReZe20/GUI-for-RePKG/blob/master/LICENSE.txt)
